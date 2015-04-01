@@ -74,5 +74,16 @@ class GameProxy
     @player.values.all? {|p| p }
   end
 
+  def marshal_dump
+    [@players.keys,@game] # TODO: make the game object marshalable
+  end
+
+  def marshal_load(array)
+    keys, @game = array
+    @notification = nil
+    @players = Hash.new
+    keys.each {|k| @players[k] = false}
+  end
+
 
 end

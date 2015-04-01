@@ -74,7 +74,7 @@ class GameServerCls
   end
 
   def save(gameName)
-    # TODO: marchael game
+    # TODO: marshal game
   end
 
   def loadGame(gameName, username)
