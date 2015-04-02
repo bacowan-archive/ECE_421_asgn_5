@@ -25,6 +25,7 @@ class GameServerCls
     @gameSessions = Hash.new # map of gameNames to their respective game connection info objects
     # TODO: make a lock around the hash, or make it multi-threaded (one for each game)
     @gameCount = 0 # number of games in session
+    @database = Database.new
   end
 
   def getNotification(gameName)
@@ -58,7 +59,7 @@ class GameServerCls
 
   # this is the listener for the board.
   def notify(*args)
-    # TODO: forward notifications onto clients
+    # TODO: forward notifications onto clients, and if notification is that the game has finished, add to the database
   end
 
   def put(gameName, column)
