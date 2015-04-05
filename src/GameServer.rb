@@ -1,4 +1,5 @@
 require 'xmlrpc/server'
+require_relative 'GameServerCls'
 
 DEFAULT_PORT = 50539
 
@@ -11,7 +12,7 @@ module GameServer
     else
       raise 'wrong number of arguments'
     end
-    server = XMLRPC::Server.new(port)
+    server = XMLRPC::Server.new(port, ENV['HOSTNAME'])
     server.add_handler(GameServerCls::INTERFACE, GameServerCls.new)
     server.serve
   end

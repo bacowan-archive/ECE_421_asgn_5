@@ -1,4 +1,5 @@
 require 'xmlrpc/server'
+require_relative 'DatabaseProxy'
 
 DEFAULT_MAX_GAMES = 5
 OTHER_PLAYER_LEFT_TOKEN = 'OTHER_PLAYER_LEFT_TOKEN'
@@ -9,7 +10,7 @@ class GameServerCls
     meth 'array put(String, int)', 'put a piece (of the client) in the given column', 'put'
     meth 'boolean quit(String, String)', 'quit the game and disconnect from the server', 'quit'
     meth 'boolean save()', 'save the current game state', 'save'
-    meth 'Map<String,[int,int]> getStats()', 'get the stats of the "tournament"', 'getStats'
+    meth 'Hash getStats()', 'get the stats of the "tournament"', 'getStats'
     meth 'boolean connectToGame(String, String)', 'connect to the game of the first string, as the user of the second string', 'connectToGame'
     meth 'boolean hostGame(String, String, String, Array)', 'host a game as a user of the given string, and the game type of the third string'
     meth 'boolean loadGame(String, String)', 'load the game of the first string as the user of the second string', 'loadGame'
@@ -25,7 +26,7 @@ class GameServerCls
     @gameSessions = Hash.new # map of gameNames to their respective game connection info objects
     # TODO: make a lock around the hash, or make it multi-threaded (one for each game)
     @gameCount = 0 # number of games in session
-    @database = Database.new
+    @database = DatabaseProxy.new
   end
 
   def getNotification(gameName)
