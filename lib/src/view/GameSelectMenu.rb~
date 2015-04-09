@@ -50,6 +50,8 @@ class GameMenu
 		window.destroy
 	}
 
+# Step 5: load Game Button
+
 
     window.show()
     Gtk.main()
@@ -75,7 +77,7 @@ class GameMenu
 			gameType = OttoTootWinCondition.name
 		end
 		client.hostGame(@gameName,@userName,gameType,[6,7])
-		new_game = MultiplayerGameBoard.new(client, choices)
+		new_game = MultiplayerGameBoard.new(client, choices, @gameName, @userName)
 		
 	end
 
@@ -83,6 +85,12 @@ class GameMenu
 		#Get Choices
 		choices = (1..5).collect{|i| @builder.get_object("combobox" + i.to_s).active_text}
 		client = GameClientObjController.new(@server)
+	end
+
+	def load_game
+		client= GameClientObjController.new(@server)
+		client.load(gameName, username)
+		new_game = Maul
 	end
 
 	def setNames(gameName, userName)

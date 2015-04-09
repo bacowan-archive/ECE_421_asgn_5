@@ -50,6 +50,8 @@ class GameMenu
 		window.destroy
 	}
 
+# Step 5: load Game Button
+
 
     window.show()
     Gtk.main()
@@ -83,6 +85,12 @@ class GameMenu
 		#Get Choices
 		choices = (1..5).collect{|i| @builder.get_object("combobox" + i.to_s).active_text}
 		client = GameClientObjController.new(@server)
+	end
+
+	def load_game
+		client= GameClientObjController.new(@server)
+		client.load(gameName, username)
+		new_game = Maul
 	end
 
 	def setNames(gameName, userName)

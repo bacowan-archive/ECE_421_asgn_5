@@ -2,6 +2,7 @@ require 'thread'
 
 class GameClientObjController
 	def initialize(server)
+		@view = nil
 		@done = false
 		@server = server
 		@serverProxy = @server.proxy('game')
@@ -10,6 +11,9 @@ class GameClientObjController
 		@notificationCount = 0
 	end
 
+	def setView(view)
+		@view = view
+	end
 
 	def put(gameName, column)
 		ret = @serverProxy.put(gameName,column.to_i)
@@ -36,7 +40,7 @@ class GameClientObjController
 	end
 
 	def hostGame(gameName, userName, gameType, dims)
-		ret =  @serverProxy.hostGame(gameName,userName,gameType,dims[0].to_i,dims[1].to_i])
+		ret =  @serverProxy.hostGame(gameName,userName,gameType,[dims[0].to_i,dims[1].to_i])
 		if ret == true
 			@gameName = gameName
 		end
@@ -61,15 +65,6 @@ class GameClientObjController
 	def _getNotification
 		temp = @server.call_async('game.getNotification', @gameName, @notificationCount )
 		@notificationCount += 1
-		ret = temp#Marshal.load( temp )
-		@printMutex.synchronize {
-			puts ret
-			begin
-				puts ''
-				print ret[1]
-				puts ''
-			rescue
-			end
-		}
+		@view.notify(temp)
 	end
 end

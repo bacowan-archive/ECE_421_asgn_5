@@ -9,6 +9,7 @@ require_relative '../model/AIFactory.rb'
 class MultiplayerGameBoard
 	def initialize(client, choices, gameName, userName)
 	 @client = client
+	 @client.setView(self)
 	 @gameName = gameName
 	 @userName = userName
 	
@@ -57,19 +58,28 @@ class MultiplayerGameBoard
 #setup the window
   Gtk.init
     @builder = Gtk::Builder::new
-    @builder.add_from_file("./lib/src/view/Game_Screen.glade")
+    @builder.add_from_file("./lib/src/view/Multi_Game_Screen.glade")
 	
     
 	
 # Step 1: get the window to terminate the program when it's destroyed
 #
     window = @builder.get_object("window1")
-    window.signal_connect( "destroy" ) { Gtk.main_quit }
+    window.signal_connect( "destroy" ) 
+{ 
+	@client.quit(@gameName, @userName)
+	Gtk.main_quit 
+}
 
 # Setup the Quit Button
-	@builder.get_object("button1").signal_connect("clicked"){
-		@client.		
+	@builder.get_object("button1").signal_connect("clicked")
+	{	
 		window.destroy
+	}
+
+# Setup the Save Button
+	@builder.get_object("button2").signal_connect("clicked"){
+		@client.save(@gameName)	
 	}
 
 
@@ -85,7 +95,7 @@ class MultiplayerGameBoard
 # Setup Clickable Images
 (1..7).each{|i| @builder.get_object("eventbox" + i.to_s).signal_connect("button_press_event"){play_move(i)}}
 
-
+@client._notifications
 
 window.show()
     Gtk.main()
@@ -143,7 +153,7 @@ end
 def update(board)
 #Update the Board View
 	state_array = Array.new
-	board.getBoard.each{|row| row.each{|element| state_array << element}}
+	board.each{|row| row.each{|element| state_array << element}}
 
 	(1..42).each{|i| @builder.get_object("image"+i.to_s).set(@image_map[state_array[i-1]])}
 

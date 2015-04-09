@@ -2,21 +2,22 @@ require 'gtk2'
 
 class HostScreen
 
-def initialize()
-end
+def initialize(parentBoard)
+ @parent = parentBoard
  Gtk.init
  @builder = Gtk::Builder::new
  @builder.add_from_file("./lib/src/view/Host_Screen.glade")
  
  @builder.get_object("button1").signal_connect("clicked")
 {
-	gameName = @builder.get_object("entry1").text
-	userName = @builder.get_object("entry2").text
+	setParentNames(@builder.get_object("entry1").text,@builder.get_object("entry2").text)
 	window.destroy
 }
  @builder.get_object("button2").signal_connect("clicked"){window.destroy}
 
+end
 
-
+def setParentNames(gameName, userName)
+ @parent.setNames(gameName, userName)
 end
 
