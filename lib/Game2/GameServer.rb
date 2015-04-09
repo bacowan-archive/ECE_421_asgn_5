@@ -1,12 +1,15 @@
 require 'xmlrpc/server'
 require_relative 'GameServerCls'
 
-DEFAULT_PORT = 50539
-
 module GameServer
+
+  def GameServer.DEFAULT_PORT
+    50539
+  end
+
   def start(*args)
     if args.length == 0
-      port = DEFAULT_PORT
+      port = GameServer.DEFAULT_PORT
     elsif args.length == 1
       port = args[0]
     else

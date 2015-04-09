@@ -19,12 +19,12 @@ class DatabaseProxy
   end
 
   def _initializeDatabase
-    @db.query('CREATE TABLE IF NOT EXISTS ' + TABLE_NAME /
-      + '(' + USER_COLUMN + ' CHAR(40) NOT NULL,' /
-      + WINS_COLUMN + ' int NOT NULL,' /
-      + LOSSES_COLUMN + ' int NOT NULL,' /
-      + TIES_COLUMN + ' int NOT NULL,' /
-      + 'PRIMARY KEY (' + USER_COLUMN + '))')
+    @db.query('CREATE TABLE IF NOT EXISTS ' + TABLE_NAME +
+      '(' + USER_COLUMN + ' CHAR(40) NOT NULL,' +
+      WINS_COLUMN + ' int NOT NULL,' +
+      LOSSES_COLUMN + ' int NOT NULL,' +
+      TIES_COLUMN + ' int NOT NULL,' +
+      'PRIMARY KEY (' + USER_COLUMN + '))')
   end
 
   def addWin(username)
