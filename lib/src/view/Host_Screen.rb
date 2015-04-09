@@ -7,6 +7,8 @@ def initialize(parentBoard)
  Gtk.init
  @builder = Gtk::Builder::new
  @builder.add_from_file("./lib/src/view/Host_Screen.glade")
+
+window = @builder.get_object("window1")
  
  @builder.get_object("button1").signal_connect("clicked")
 {

@@ -8,12 +8,17 @@ class GameMenu
 
 	@gameName = "myGame"
 	@userName = "Iplayer"
+	@host = ENV['HOSTNAME']  
+	@path = '/RPC2'
+	@port = GameServer.DEFAULT_PORT
+	@client = client = GameClientObjController.new(@host,@path,@port)
+	@choices = nil
 
 # Initialize
     Gtk.init
     @builder = Gtk::Builder::new
     @builder.add_from_file("./lib/src/view/Game_Select_Screen.glade")
-    @server = XMLRPC::Client.new(ENV['HOSTNAME'], '/RPC2', GameServer.DEFAULT_PORT)
+    
 
 #
 # Step 1: get the window to terminate the program when it's destroyed
@@ -51,25 +56,28 @@ class GameMenu
 	}
 
 # Step 5: load Game Button
+	load_button = @builder.get_object("button5")
+	load_button.signal_connect("clicked"){
+		load_game
+		window.destroy
+		
+	}
 
 
     window.show()
     Gtk.main()
   end
 	def start_game
-		#Get Choices
-		choices = (1..5).collect{|i| @builder.get_object("combobox" + i.to_s).active_text}
-		new_game = GameBoard.new(choices)
-			
+		getChoices()
+		new_game = GameBoard.new(@choices)	
 	end 
+
 	def resume
 		@builder.get_object("window1").show
 	end
 
 	def host_game
-		#Get Choices
-		choices = (1..5).collect{|i| @builder.get_object("combobox" + i.to_s).active_text}
-		client = GameClientObjController.new(@server)
+		getChoices()
 		screen = HostScreen.new(self)
 		if choices[0] == "Connect4"
 			gameType = ConnectFourWinCondition.name
@@ -77,25 +85,30 @@ class GameMenu
 			gameType = OttoTootWinCondition.name
 		end
 		client.hostGame(@gameName,@userName,gameType,[6,7])
-		new_game = MultiplayerGameBoard.new(client, choices, @gameName, @userName)
-		
+		new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName)
 	end
 
 	def join_game
-		#Get Choices
-		choices = (1..5).collect{|i| @builder.get_object("combobox" + i.to_s).active_text}
-		client = GameClientObjController.new(@server)
+		getChoices()
+		screen = HostScreen.new(self)
+		client.connectToGame(@gameName,@userName)
+		new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName)
 	end
 
 	def load_game
-		client= GameClientObjController.new(@server)
-		client.load(gameName, username)
-		new_game = Maul
+		getChoices()
+		screen = HostScreen.new(self)
+		@client.load(@gameName, @username)
+		new_game = MultiplayerGameBoard.new(@client,@choices,@gameName,@userName)
 	end
 
 	def setNames(gameName, userName)
 		@gameName = gameName
 		@userName = userName
+	end
+
+	def getChoices()
+		@choices = (1..5).collect{|i| @builder.get_object("combobox" + i.to_s).active_text}
 	end
 
 end
