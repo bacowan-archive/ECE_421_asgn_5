@@ -71,6 +71,9 @@ class GameClientObj
 			}
 		elsif args[0] == 'loadGame'
 			ret = serverProxy.loadGame(args[1],args[2])
+			if ret == true
+				@gameName = args[1]
+			end
 			@printMutex.synchronize {
 				puts ret
 			}

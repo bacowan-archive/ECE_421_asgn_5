@@ -26,7 +26,7 @@ class AILogic
   # look ahead in the game nMoreTimes turns. If the game can be won this turn, return the [true,winingColumn].
   # Otherwise, return [false,columnWithBestChances,NumberOfWinningMovesForThatColumn,NumberOfLosingMovesForThatColumn]
   def _lookAheadOneMove(col,board,nMoreTimes,opponent)
-    puts nMoreTimes
+    
 
     # stopping condition
     if nMoreTimes < 1

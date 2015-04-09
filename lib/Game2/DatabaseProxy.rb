@@ -82,8 +82,8 @@ class DatabaseProxy
   def loadGame(gameName)
     ret = @db.query('SELECT ' + GAME_COLUMN + " FROM " + SAVED_GAMES_TABLE_NAME + " WHERE " +
       GAME_NAME_COLUMN + " = '" + gameName + "'").fetch_row
-    @db.query("DELETE FROM " + SAVED_GAMES_TABLE_NAME + " WHERE " + GAME_NAME_COLUMN + "='" + gameName + "'")
-    return ret
+    #@db.query("DELETE FROM " + SAVED_GAMES_TABLE_NAME + " WHERE " + GAME_NAME_COLUMN + "='" + gameName + "'")
+    return ret[0]
   end
 
   def _addToColumn(username,col)

@@ -95,4 +95,19 @@ class Board
     return @board.length - 1 - revVal
   end
 
+  def ==(other)
+    if !other.is_a? Board
+      return false
+    end
+    return other.getBoard == getBoard
+  end
+
+  def marshal_dump
+    [@board]
+  end
+
+  def marshal_load(array)
+    @board = array[0]
+  end
+
 end

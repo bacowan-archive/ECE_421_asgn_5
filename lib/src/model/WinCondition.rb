@@ -70,4 +70,12 @@ class WinCondition
     return @winCondition.checkCondition(items,@p1,@p2)
   end
 
+  def marshal_dump
+    [@winCondition, @p1, @p2]
+  end
+
+  def marshal_load(array)
+    @winCondition, @p1, @p2 = array
+  end
+
 end

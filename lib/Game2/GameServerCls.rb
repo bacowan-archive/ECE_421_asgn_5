@@ -1,7 +1,7 @@
 require 'xmlrpc/server'
 require 'logger'
 require 'thread'
-require 'src/model/Game'
+require '../src/model/Game'
 require_relative 'DatabaseProxy'
 require_relative 'GameProxy'
 
@@ -88,13 +88,16 @@ class GameServerCls
   # userName: the name of the user joining
   def connectToGame(gameName,userName)
     if @gameSessions.has_key?(gameName) # join the existing game
+      puts 'hasgame'
       if not @gameSessions[gameName].addPlayer(userName)
+        puts 'but player could not be added'
         return false
       end
-    else # too many games
-      return false
-    end
-    return true
+      puts 'returning true'
+      return true
+    end # no such game
+    puts 'no such game'
+    return false
   end
 
   def put(gameName, column)
@@ -126,10 +129,11 @@ class GameServerCls
       game = @databaseProxy.loadGame(gameName)
       return false if game == nil
       @gameSessions[gameName] = Marshal.load(game)
-      return @gameSessions[gameName].addUser(userName)
+      @gameSessions[gameName].addPlayer(username)
     rescue Mysql::Error => e
       return false
     end
+    return true
   end
 
   def getStats

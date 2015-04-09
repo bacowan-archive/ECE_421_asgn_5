@@ -94,4 +94,12 @@ class AILogic
     return [best[0],best[1],totalWinningMoves,totalLosingMoves]
   end
 
+  def marshal_dump
+  [@playerId,@otherId,@winCondition,@lookAheadCount]
+  end
+
+  def marshal_load(array)
+  @playerId,@otherId,@winCondition,@lookAheadCount = array
+  end
+
 end

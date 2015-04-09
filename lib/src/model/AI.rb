@@ -18,4 +18,12 @@ class AI
     (0..board.getWidth-1).select {|i| board.columnFull(i)}
   end
 
+  def marshal_dump
+  [@logic,@id,@columnController]
+  end
+
+  def marshal_load(array)
+  @logic,@id,@columnController = array
+  end
+
 end

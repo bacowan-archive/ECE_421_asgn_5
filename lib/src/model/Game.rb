@@ -99,4 +99,13 @@ class Game
     @aiObservers.each {|o| o.notify(*args)}
   end
 
+  def marshal_dump
+    [@players,@playerIndex,@winCondition,@board,@aiObservers]
+  end
+
+  def marshal_load(array)
+    @players, @playerIndex, @winCondition, @board, @aiObservers = array
+    @observers = []
+  end
+
 end
