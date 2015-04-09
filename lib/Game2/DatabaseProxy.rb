@@ -31,6 +31,7 @@ class DatabaseProxy
       'PRIMARY KEY (' + USER_COLUMN + '))')
     @db.query('CREATE TABLE IF NOT EXISTS ' + SAVED_GAMES_TABLE_NAME +
       ' (' + GAME_NAME_COLUMN + ' CHAR(40) NOT NULL, ' +
+      GAME_COLUMN + ' BLOB NOT NULL, ' +
       'PRIMARY KEY (' + GAME_NAME_COLUMN + '))')
   end
 
@@ -75,12 +76,14 @@ class DatabaseProxy
   end
 
   def saveGame(gameName,game)
-    @db.query('INSERT INTO ' + SAVED_GAMES_TABLE_NAME + " (" + GAME_NAME_COLUMN + ", " + GAME_COLUMN + ") VALUES ('" + gameName + "', '" + game + "'")
+    @db.query('INSERT INTO ' + SAVED_GAMES_TABLE_NAME + " (" + GAME_NAME_COLUMN + ", " + GAME_COLUMN + ") VALUES ('" + gameName + "', '" + game + "')")
   end
 
   def loadGame(gameName)
-    @db.query('SELECT ' + GAME_COLUMN + " FROM " + SAVED_GAMES_TABLE_NAME + " WHERE " +
+    ret = @db.query('SELECT ' + GAME_COLUMN + " FROM " + SAVED_GAMES_TABLE_NAME + " WHERE " +
       GAME_NAME_COLUMN + " = '" + gameName + "'").fetch_row
+    @db.query("DELETE FROM " + SAVED_GAMES_TABLE_NAME + " WHERE " + GAME_NAME_COLUMN + "='" + gameName + "'")
+    return ret
   end
 
   def _addToColumn(username,col)

@@ -1,7 +1,7 @@
 require 'xmlrpc/server'
 require 'logger'
 require 'thread'
-require 'Game'
+require 'src/model/Game'
 require_relative 'DatabaseProxy'
 require_relative 'GameProxy'
 
@@ -18,13 +18,14 @@ class GameServerCls
     meth 'boolean connectToGame(String, String)', 'connect to the game of the first string, as the user of the second string', 'connectToGame'
     meth 'boolean hostGame(String, String, String, Array)', 'host a game as a user of the given string, and the game type of the third string'
     meth 'boolean loadGame(String, String)', 'load the game of the first string as the user of the second string', 'loadGame'
+    meth 'boolean imStillAlive()', 'let the server know that the client is still alive'
   }
 
-  trap "SIGINT" do
-    @stopServerMutex.synchronize {
-      @stopServer = true
-    }
-  end
+  #trap "SIGINT" do
+  #  @stopServerMutex.synchronize {
+  #    @stopServer = true
+  #  }
+  #end
 
   # first param: max games that can take place at once
   def initialize(*args)
@@ -44,6 +45,10 @@ class GameServerCls
     @databaseProxy = DatabaseProxy.new
   end
 
+  def imStillAlive
+    return true
+  end
+
   def getNotification(gameName, notificationNum)
     notification = false
     while !notification and !@stopServer
@@ -51,12 +56,12 @@ class GameServerCls
       notification = @gameSessions[gameName].getNotification(notificationNum)
       sleep(1)
     end
+
     notification.each_with_index { |item, index|
       if item.is_a? Board
-        notification[i] = notification[i].getBoard
+        notification[index] = notification[index].getBoard
       end
     }
-
     # If the game is over, we can remove the game from the sessions, and add to the statistics
     if notification[0] == Game.WIN_FLAG
       _winGame(gameName,notification[2])
@@ -105,16 +110,26 @@ class GameServerCls
   end
 
   def save(gameName)
-    game = Marshal.dump(@gameSessions[gameName])
-    @databaseProxy.saveGame(gameName,game)
+    begin
+      game = Marshal.dump(@gameSessions[gameName])
+      @databaseProxy.saveGame(gameName,game)
+      return true
+    rescue Mysql::Error => e
+      puts e
+      return false
+    end
   end
 
   def loadGame(gameName, username)
-    return false if @gameCount >= @maxGames
-    game = @databaseProxy.loadGame(gameName)
-    return false if game == nil
-    @gameSessions[gameName] = Marshal.load(game)
-    return @gameSessions[gameName].addUser(userName)
+    begin
+      return false if @gameCount >= @maxGames
+      game = @databaseProxy.loadGame(gameName)
+      return false if game == nil
+      @gameSessions[gameName] = Marshal.load(game)
+      return @gameSessions[gameName].addUser(userName)
+    rescue Mysql::Error => e
+      return false
+    end
   end
 
   def getStats
@@ -134,8 +149,8 @@ class GameServerCls
 
   def _winGame(gameName,winner)
     @databaseProxy.addWin(winner)
-    otherPlayer = @gameSessions[gameName].players.keys.select {|user| user != winner} [0]
-    @databaseProxy.addLoss(otherPlayer)
+    otherPlayer = @gameSessions[gameName].players.keys.select {|user| user != winner}
+    @databaseProxy.addLoss(otherPlayer[0])
     @gameSessions.delete(gameName)
   end
 

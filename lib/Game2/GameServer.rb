@@ -16,7 +16,7 @@ module GameServer
       raise 'wrong number of arguments'
     end
     server = XMLRPC::Server.new(port, ENV['HOSTNAME'])
-    server.add_handler(GameServerCls::INTERFACE, GameServerCls.new)
+    server.add_handler(GameServerCls::INTERFACE, GameServerCls.new, 10)
     server.serve
   end
 end

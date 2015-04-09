@@ -1,17 +1,29 @@
 require 'thread'
 
 class GameClientObj
-	def initialize(server)
+	def initialize(host,path,port)
 		@done = false
-		@server = server
-		@serverProxy = @server.proxy('game')
+		@host = host
+		@path = path
+		@port = port
+		#@server = server
+		#@serverProxy = @server.proxy('game')
 		@printMutex = Mutex.new
 		@gameName = nil
 		@notificationCount = 0
 	end
 
+	def server
+		XMLRPC::Client.new(@host, @path, @port, nil, nil, nil, nil, nil, 9999)
+	end
+
+	def serverProxy
+		server.proxy('game')
+	end
+
 	def start
 		_notifications
+		_keepAlive
 		while !@done
 			print '>> '
 			command = gets
@@ -21,28 +33,28 @@ class GameClientObj
 
 	def _parseCommand(args)
 		if args[0] == 'put'
-			ret = @serverProxy.put(args[1],args[2].to_i)
+			ret = serverProxy.put(args[1],args[2].to_i)
 			@printMutex.synchronize {
 				puts ret
 			}
 		elsif args[0] == 'quit'
-			ret @serverProxy.quit(args[1],args[2])
+			ret serverProxy.quit(args[1],args[2])
 			@printMutex.synchronize {
 				puts ret
 			}
 			@done = true
 		elsif args[0] == 'save'
-			ret = @serverProxy.save()
+			ret = serverProxy.save(args[1])
 			@printMutex.synchronize {
 				puts ret
 			}
 		elsif args[0] == 'getStats'
-			ret = @serverProxy.getStats()
+			ret = serverProxy.getStats()
 			@printMutex.synchronize {
 				puts ret
 			}
 		elsif args[0] == 'connectToGame'
-			ret = @serverProxy.connectToGame(args[1],args[2])
+			ret = serverProxy.connectToGame(args[1],args[2])
 			if ret == true
 				@gameName = args[1]
 			end
@@ -50,7 +62,7 @@ class GameClientObj
 				puts ret
 			}
 		elsif args[0] == 'hostGame'
-			ret =  @serverProxy.hostGame(args[1],args[2],args[3],[args[4].to_i,args[5].to_i])
+			ret = serverProxy.hostGame(args[1],args[2],args[3],[args[4].to_i,args[5].to_i])
 			if ret == true
 				@gameName = args[1]
 			end
@@ -58,7 +70,7 @@ class GameClientObj
 				puts ret
 			}
 		elsif args[0] == 'loadGame'
-			ret =  @serverProxy.loadGame(args[1],args[2])
+			ret = serverProxy.loadGame(args[1],args[2])
 			@printMutex.synchronize {
 				puts ret
 			}
@@ -71,23 +83,26 @@ class GameClientObj
 				if @gameName != nil
 					_getNotification
 				end
-                                sleep(1)
+				sleep(1)
 			end
 		}
 	end
 
+	# poll the server blank messages just to let it know that we are still alive
+	def _keepAlive
+		#Thread.new {
+		#	while !@done
+		#		@server.call_async('game.imStillAlive')
+		#		sleep(5)
+		#	end
+		#}
+	end
+
 	def _getNotification
-		temp = @server.call_async('game.getNotification', @gameName, @notificationCount )
+		ret = server.call_async('game.getNotification', @gameName, @notificationCount )
 		@notificationCount += 1
-		ret = temp#Marshal.load( temp )
 		@printMutex.synchronize {
 			puts ret
-			begin
-				puts ''
-				print ret[1]
-				puts ''
-			rescue
-			end
 		}
 	end
 end

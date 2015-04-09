@@ -22,6 +22,10 @@ class GameProxy
     @game.addObserver(self)
   end
 
+  def players
+    return @players
+  end
+
   def notify(*args)
     @notifications[@notificationCount] = args
     if @notifications.size > @notificationCacheSize
@@ -76,7 +80,6 @@ class GameProxy
 
   def put(col)
     if _allPlayersPresent
-      puts @game
       @game.placePiece(col)
     end
   end
