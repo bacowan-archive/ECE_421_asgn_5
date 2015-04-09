@@ -41,6 +41,7 @@ class GameServerCls
     @log.level = Logger::WARN
     @stopServer = false
     @stopServerMutex = Mutex.new
+    @databaseProxy = DatabaseProxy.new
   end
 
   def getNotification(gameName, notificationNum)
@@ -59,6 +60,8 @@ class GameServerCls
     # If the game is over, we can remove the game from the sessions, and add to the statistics
     if notification[0] == Game.WIN_FLAG
       _winGame(gameName,notification[2])
+    elsif notification[0] == Game.STALEMATE_FLAG
+      _stalemate(gameName)
     end
 
     return notification
@@ -66,12 +69,12 @@ class GameServerCls
 
   def hostGame(gameName,userName,gameType,dimensions)
     if @gameCount < @maxGames # start a new game
-      #begin
+      begin
         @gameSessions[gameName] = GameProxy.new(gameName,gameType,dimensions)
         return @gameSessions[gameName].addPlayer(userName)
-      #rescue
-      #  return false
-      #end
+      rescue
+        return false
+      end
     end
     return false
   end
@@ -102,15 +105,20 @@ class GameServerCls
   end
 
   def save(gameName)
-    # TODO: marshal game
+    game = Marshal.dump(@gameSessions[gameName])
+    @databaseProxy.saveGame(gameName,game)
   end
 
   def loadGame(gameName, username)
-    # TODO: this
+    return false if @gameCount >= @maxGames
+    game = @databaseProxy.loadGame(gameName)
+    return false if game == nil
+    @gameSessions[gameName] = Marshal.load(game)
+    return @gameSessions[gameName].addUser(userName)
   end
 
   def getStats
-    # TODO: this
+    return @databaseProxy.getAllUserStats
   end
 
   # tell anyone listening that it's time to shut down the server
@@ -125,7 +133,15 @@ class GameServerCls
   #end
 
   def _winGame(gameName,winner)
-    gameSessions.delete(gameName)
+    @databaseProxy.addWin(winner)
+    otherPlayer = @gameSessions[gameName].players.keys.select {|user| user != winner} [0]
+    @databaseProxy.addLoss(otherPlayer)
+    @gameSessions.delete(gameName)
+  end
+
+  def _stalemate(gameName)
+    @gameSessions[gameName].players.keys.each {|user| @databaseProxy.addTie(user)}
+    @gameSessions.delete(gameName)
   end
 
 end

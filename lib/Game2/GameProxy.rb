@@ -93,7 +93,7 @@ class GameProxy
   end
 
   def marshal_dump
-    [@players.keys,@game] # TODO: make the game object marshalable
+    [@players.keys,@game]
   end
 
   def marshal_load(array)
