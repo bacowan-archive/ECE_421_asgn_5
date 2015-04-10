@@ -41,6 +41,7 @@ class GameClientObjController
 
 	def getStats()
 		ret = serverProxy.getStats()
+		return ret
 	end
 
 	def connectToGame(gameName,userName)
