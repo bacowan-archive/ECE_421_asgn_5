@@ -23,7 +23,6 @@ class GameClientObj
 
 	def start
 		_notifications
-		_keepAlive
 		while !@done
 			print '>> '
 			command = gets
@@ -95,7 +94,10 @@ class GameClientObj
 		ret = server.call_async('game.getNotification', @gameName, @notificationCount )
 		@notificationCount += 1
 		@printMutex.synchronize {
-			puts ret
+			ret.each {|r|
+				print r
+				puts ''
+			}
 		}
 	end
 end
