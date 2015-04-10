@@ -35,7 +35,7 @@ class GameClientObj
 		if args[0] == 'put'
 			ret = serverProxy.put(args[1],args[2].to_i)
 			@printMutex.synchronize {
-				puts ret
+				#puts ret
 			}
 		elsif args[0] == 'quit'
 			ret serverProxy.quit(args[1],args[2])
@@ -89,16 +89,6 @@ class GameClientObj
 				sleep(1)
 			end
 		}
-	end
-
-	# poll the server blank messages just to let it know that we are still alive
-	def _keepAlive
-		#Thread.new {
-		#	while !@done
-		#		@server.call_async('game.imStillAlive')
-		#		sleep(5)
-		#	end
-		#}
 	end
 
 	def _getNotification

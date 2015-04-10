@@ -1,7 +1,7 @@
 require 'xmlrpc/server'
 require 'logger'
 require 'thread'
-require '../src/model/Game'
+require_relative '../src/model/Game'
 require_relative 'DatabaseProxy'
 require_relative 'GameProxy'
 
@@ -18,13 +18,10 @@ class GameServerCls
     meth 'boolean connectToGame(String, String)', 'connect to the game of the first string, as the user of the second string', 'connectToGame'
     meth 'boolean hostGame(String, String, String, Array)', 'host a game as a user of the given string, and the game type of the third string'
     meth 'boolean loadGame(String, String)', 'load the game of the first string as the user of the second string', 'loadGame'
-    meth 'boolean imStillAlive()', 'let the server know that the client is still alive'
   }
 
   #trap "SIGINT" do
-  #  @stopServerMutex.synchronize {
-  #    @stopServer = true
-  #  }
+  #  puts 'yay!'
   #end
 
   # first param: max games that can take place at once
@@ -39,23 +36,23 @@ class GameServerCls
     @gameCount = 0 # number of games in session
     @database = DatabaseProxy.new
     @log = Logger.new(STDOUT)
-    @log.level = Logger::WARN
+    #@log.level = Logger::WARN
     @stopServer = false
     @stopServerMutex = Mutex.new
     @databaseProxy = DatabaseProxy.new
-  end
-
-  def imStillAlive
-    return true
+    @log.debug('server started')
   end
 
   def getNotification(gameName, notificationNum)
+    @log.debug('getting ' + notificationNum.to_s + '\'st notification for ' + gameName)
     notification = false
     while !notification and !@stopServer
       # poll for notificaion
       notification = @gameSessions[gameName].getNotification(notificationNum)
       sleep(1)
     end
+
+    #@log.debug(notificationNum.to_s + '\'th notification for ' + gameName + 'is processing')
 
     notification.each_with_index { |item, index|
       if item.is_a? Board
@@ -69,70 +66,95 @@ class GameServerCls
       _stalemate(gameName)
     end
 
+    #@log.debug(notificationNum.to_s + '\'th notification for ' + gameName + 'is sending')
+
     return notification
   end
 
   def hostGame(gameName,userName,gameType,dimensions)
+    @log.debug('hosting game ' + gameName + '. Host user: ' + userName + '. Game Type: ' + gameType + '. Dimensions: ' + dimensions.to_s)
     if @gameCount < @maxGames # start a new game
       begin
         @gameSessions[gameName] = GameProxy.new(gameName,gameType,dimensions)
         return @gameSessions[gameName].addPlayer(userName)
       rescue
-        return false
+        @log.debug('game creation step failed for game: ' + gameName + '. Host user: ' + userName + '. Game Type: ' + gameType + '. Dimensions: ' + dimensions.to_s)
+        return false # TODO: make this a custom error
       end
     end
+    @log.debug('cound not host game: ' + gameName + '. Limit for number of games on server met.')
     return false
   end
 
   # gameName: the name of the game to join
   # userName: the name of the user joining
   def connectToGame(gameName,userName)
+    @log.debug('connecting to game: ' + gameName + ' as user: ' + userName)
     if @gameSessions.has_key?(gameName) # join the existing game
-      puts 'hasgame'
       if not @gameSessions[gameName].addPlayer(userName)
-        puts 'but player could not be added'
+        @log.debug('game "' + gameName + '" is full, and user "' + userName + '" is not a part of the game')
         return false
       end
-      puts 'returning true'
+      @log.debug('user "' + userName + '" has connected to game "' + gameName + '"')
       return true
     end # no such game
-    puts 'no such game'
+    @log.debug('game "' + gameName + '" does not exist')
     return false
   end
 
   def put(gameName, column)
-    @gameSessions[gameName].put(column)
+    @log.debug('placing piece in game "' + gameName + '" in column ' + column.to_s)
+    begin
+      return @gameSessions[gameName].put(column)
+    rescue
+      @log.debug('something went wrong when placing piece in game "' + gameName + '" in column "' + column.to_s)
+    end
+    return [Game.UNKNOWN_EXCEPTION]
   end
 
   def quit(gameName, username)
+    @log.debug('player "' + username + '" is leaving game "' + gameName + '"')
     if @gameSessions[gameName].playerLeave(userName)
       notify([OTHER_PLAYER_LEFT_TOKEN])
+      @log.debug('player "' + username + '" has left game "' + gameName + '"')
       return true
     end
+    @log.debug('something went wrong; player "' + username + '" could not leave game "' + gameName + '"')
     return false
   end
 
   def save(gameName)
+    @log.debug('saving game "' + gameName + '"')
     begin
       game = Marshal.dump(@gameSessions[gameName])
       @databaseProxy.saveGame(gameName,game)
+      @log.debug('game "' + gameName + '" was saved')
       return true
     rescue Mysql::Error => e
-      puts e
+      @log.debug('game "' + gameName + '" could not be saved: ' + e.to_s)
       return false
     end
   end
 
   def loadGame(gameName, username)
+    @log.debug('trying to load game "' + gameName + '", with user "' + username + '" hosting')
     begin
-      return false if @gameCount >= @maxGames
+      if @gameCount >= @maxGames
+        @log.debug('too many games already in session to load game "' + gameName + '"')
+        return false
+      end
       game = @databaseProxy.loadGame(gameName)
-      return false if game == nil
+      if game == nil
+        @log.debug('game "' + gameName + '" could not be loaded')
+        return false
+      end
       @gameSessions[gameName] = Marshal.load(game)
       @gameSessions[gameName].addPlayer(username)
     rescue Mysql::Error => e
       return false
+      @log.debug('game "' + gameName + '" could not be loaded due to sql error: ' + e.to_s)
     end
+    @log.debug('game "' + gameName + '" has been loaded with user "' + username + '" hosting')
     return true
   end
 
