@@ -37,7 +37,7 @@ class GameClientObj
 				#puts ret
 			}
 		elsif args[0] == 'quit'
-			ret serverProxy.quit(args[1],args[2])
+			ret = serverProxy.quit(args[1],args[2])
 			@printMutex.synchronize {
 				puts ret
 			}

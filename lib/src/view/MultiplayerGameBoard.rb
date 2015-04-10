@@ -101,9 +101,8 @@ window.show()
 
 def notify(args)
 	flags_map = {'CHANGE_TURN'=>0, 'WIN'=>1, 'STALEMATE'=>2, 'COLUMN_FULL'=>3, 'UNKNOWN_EXCEPTION'=>4 }
-
+	puts args[0]
 	if(flags_map[args[0]] == 0)
-
 		board = args[1]
 		player = args[2]
 		if player == 1
@@ -113,8 +112,8 @@ def notify(args)
 		end
 		update(board)
 		
-		# Play Continues	
-		@builder.get_object("label1").text = message " take your turn."
+		# Play Continues
+		@builder.get_object("label1").text = message + " take your turn." 
 	
 	elsif(flags_map[args[0]] == 1) 
 		# Declare the Winner in the Info box up top
