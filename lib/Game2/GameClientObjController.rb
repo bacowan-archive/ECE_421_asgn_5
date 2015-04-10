@@ -46,7 +46,7 @@ class GameClientObjController
 	def connectToGame(gameName,userName)
 		ret = serverProxy.connectToGame(gameName,userName)
 		if ret == true
-			@gameName = args[1]
+			@gameName = gameName
 		end
 	end
 
@@ -55,6 +55,7 @@ class GameClientObjController
 		if ret == true
 			@gameName = gameName
 		end
+		return ret
 	end
 
 	def loadGame(gameName, userName)
@@ -76,6 +77,7 @@ class GameClientObjController
 	def _getNotification
 		temp = server.call_async('game.getNotification', @gameName, @notificationCount )
 		@notificationCount += 1
+		puts "Notify called and returned\n"
 		@view.notify(temp)
 	end
 end

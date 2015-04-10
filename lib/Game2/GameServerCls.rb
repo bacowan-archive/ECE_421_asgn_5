@@ -1,7 +1,7 @@
 require 'xmlrpc/server'
 require 'logger'
 require 'thread'
-require '../src/model/Game'
+require_relative '../src/model/Game'
 require_relative 'DatabaseProxy'
 require_relative 'GameProxy'
 

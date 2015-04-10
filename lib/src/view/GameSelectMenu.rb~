@@ -1,6 +1,8 @@
 require 'gtk2'
 require_relative 'GameBoard.rb'
 require_relative '../view/Host_Screen.rb'
+require_relative '../../Game2/GameClientObjController.rb'
+require_relative '../view/MultiplayerGameBoard.rb'
 
 class GameMenu
 
@@ -11,7 +13,7 @@ class GameMenu
 	@host = ENV['HOSTNAME']  
 	@path = '/RPC2'
 	@port = GameServer.DEFAULT_PORT
-	@client = client = GameClientObjController.new(@host,@path,@port)
+	@client = GameClientObjController.new(@host,@path,@port)
 	@choices = nil
 
 # Initialize
@@ -79,19 +81,23 @@ class GameMenu
 	def host_game
 		getChoices()
 		screen = HostScreen.new(self)
-		if choices[0] == "Connect4"
+		if @choices[0] == "Connect4"
 			gameType = ConnectFourWinCondition.name
 		else
 			gameType = OttoTootWinCondition.name
 		end
-		client.hostGame(@gameName,@userName,gameType,[6,7])
-		new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName)
+		ret = @client.hostGame(@gameName,@userName,gameType,[6,7])
+		if ret == true
+			new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName)
+		else
+			puts "Failed to Connect\n"
+		end
 	end
 
 	def join_game
 		getChoices()
 		screen = HostScreen.new(self)
-		client.connectToGame(@gameName,@userName)
+		@client.connectToGame(@gameName,@userName)
 		new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName)
 	end
 

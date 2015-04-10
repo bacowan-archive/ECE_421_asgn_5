@@ -65,15 +65,13 @@ class MultiplayerGameBoard
 # Step 1: get the window to terminate the program when it's destroyed
 #
     window = @builder.get_object("window1")
-    window.signal_connect( "destroy" ) 
-{ 
+    window.signal_connect( "destroy" ){ 
 	@client.quit(@gameName, @userName)
 	Gtk.main_quit 
 }
 
 # Setup the Quit Button
-	@builder.get_object("button1").signal_connect("clicked")
-	{	
+	@builder.get_object("button1").signal_connect("clicked"){	
 		window.destroy
 	}
 

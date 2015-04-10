@@ -154,12 +154,8 @@ def update(board)
 #Update the Board View
 	state_array = Array.new
 	board.each{|row| row.each{|element| state_array << element}}
-
 	(1..42).each{|i| @builder.get_object("image"+i.to_s).set(@image_map[state_array[i-1]])}
-
 end
-
-
 
 	
 end
