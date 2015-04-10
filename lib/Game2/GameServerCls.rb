@@ -43,13 +43,9 @@ class GameServerCls
     notification = false
     while !notification and !@stopServer
       # poll for notificaion
-      puts 'inside'
       sleep(1)
-      puts gameName
-      puts @gameSessions
       notification = @gameSessions[gameName].getNotification(notificationNum)
       if @gameSessions[gameName].nPlayersPresent == 0 # some extra cleanup
-        puts 'oh no!'
         @gameSessions.delete(gameName)
         return []
       end
@@ -152,14 +148,12 @@ class GameServerCls
         return [false,false]
       end
       @gameSessions[gameName] = Marshal.load(game)
-      puts 'adding player'
       @gameSessions[gameName].addPlayer(username)
     rescue Mysql::Error => e
       return [false,false]
       @log.debug('game "' + gameName + '" could not be loaded due to sql error: ' + e.to_s)
     end
     @log.debug('game "' + gameName + '" has been loaded with user "' + username + '" hosting')
-    puts [@gameSessions[gameName].gameType,@gameSessions[gameName].hostUser]
     return [@gameSessions[gameName].gameType,@gameSessions[gameName].hostUser]
   end
 

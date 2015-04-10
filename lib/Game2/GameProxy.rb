@@ -59,9 +59,6 @@ class GameProxy
       #TODO raise an error
     end
 
-    print @notifications
-    puts ''
-
     if @notifications.has_key? index
       return @notifications[index]
     end
@@ -141,15 +138,24 @@ class GameProxy
   end
 
   def marshal_dump
-    [@players.keys,@game,@notifications,@notificationCacheSize,@notificationCount,@hostUser]
+    if @notificationCount = 0
+      cnt = 0
+    else
+      cnt = 1
+    end
+    [@players.keys,@game,@notifications,@notificationCacheSize,cnt,@hostUser]
   end
 
   def marshal_load(array)
-    keys, @game, @notifications, @notificationCacheSize, @notificationCount, @hostUser = array
+    keys, @game, notifications, @notificationCacheSize, @notificationCount, @hostUser = array
     # reset the notifications (only store the latest one)
-    lastNotification = @notifications[@notifications.keys.max]
-    @notifications = Hash.new
-    @notifications[0] = @notifications.keys.max
+    if notifications.length > 0
+      lastNotification = notifications[notifications.keys.max]
+      @notifications = Hash.new
+      @notifications[0] = lastNotification
+    else
+      @notifications = Hash.new
+    end
     @players = Hash.new
     keys.each {|k| @players[k] = false}
     @game.addObserver(self)
