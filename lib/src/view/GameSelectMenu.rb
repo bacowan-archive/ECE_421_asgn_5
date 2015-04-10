@@ -9,8 +9,8 @@ class GameMenu
 
   def initialize
 
-	@gameName = "myGame"
-	@userName = "Iplayer"
+	@gameName = nil
+	@userName = nil
 	@host = ENV['HOSTNAME']  
 	@path = '/RPC2'
 	@port = GameServer.DEFAULT_PORT
@@ -89,39 +89,51 @@ class GameMenu
 
 	def host_game
 		getChoices()
+		@gameName = nil
+		@userName = nil
 		screen = HostScreen.new(self)
 		if @choices[0] == "Connect4"
 			gameType = ConnectFourWinCondition.name
 		else
 			gameType = OttoTootWinCondition.name
 		end
-		ret = @client.hostGame(@gameName,@userName,gameType,[6,7])
-		if ret == true
-			new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName, 1)
-		else
-			puts "Failed to Connect\n"
+		if @gameName != nil and @userName != nil
+			ret = @client.hostGame(@gameName,@userName,gameType,[6,7])
+			if ret == true
+				new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName, 1)
+			else
+				puts "Failed to Connect\n"
+			end
 		end
 	end
 
 	def join_game
 		getChoices()
+		@gameName = nil
+		@userName = nil
 		screen = HostScreen.new(self)
-		@client.connectToGame(@gameName,@userName)
-		new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName, 2)
+		if @gameName != nil and @userName != nil
+			@client.connectToGame(@gameName,@userName)
+			new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName, 2)
+		end
 	end
 
 	def load_game
 		getChoices()
+		@gameName = nil
+		@userName = nil
 		screen = HostScreen.new(self)
-		ret = @client.loadGame(@gameName, @userName)
-		@choices[0] = ret[0]
-		if ret[1] == @userName
-			host = 1
-		else
-			host = 2
-		end
-		puts 'gameName: ' + @gameName
-		new_game = MultiplayerGameBoard.new(@client,@choices,@gameName,@userName, host)
+		if @gameName != nil and @userName != nil		
+			ret = @client.loadGame(@gameName, @userName)
+			@choices[0] = ret[0]
+			if ret[1] == @userName
+				host = 1
+			else
+				host = 2
+			end
+			puts 'gameName: ' + @gameName
+			new_game = MultiplayerGameBoard.new(@client,@choices,@gameName,@userName, host)
+		end	
 	end
 
 	def stats
