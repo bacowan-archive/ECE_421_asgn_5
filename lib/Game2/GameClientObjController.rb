@@ -76,6 +76,9 @@ class GameClientObjController
 
 	def _getNotification
 		temp = server.call_async('game.getNotification', @gameName, @notificationCount )
+		temp.each{|e| 
+			print e
+			puts ''}
 		@notificationCount += 1
 		puts "Notify called and returned\n"
 		@view.notify(temp)

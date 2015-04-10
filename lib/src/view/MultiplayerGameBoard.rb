@@ -17,16 +17,16 @@ class MultiplayerGameBoard
 	@win = 0
 	if choices[0] == "Connect4"
 		gameType = ConnectFourWinCondition.name
-		player1Piece = "Red"
-		player2Piece = "Yellow"
+		player1Piece = 1
+		player2Piece = 2
 		@image_map = {0=>"./lib/src/view/Empty_Grid.png",
 				 player1Piece=>"./lib/src/view/Red_Grid.png",
 				 player2Piece=>"./lib/src/view/Yellow_Grid.png"}
 		
 	else
 		gameType = OttoTootWinCondition.name
-		player1Piece = "O"
-		player2Piece = "T"
+		player1Piece = 1
+		player2Piece = 2
 		@image_map = {0=>"./lib/src/view/Empty_Grid.png",
 				 player1Piece=>"./lib/src/view/O_Grid.png",
 				 player2Piece=>"./lib/src/view/T_Grid.png"}
@@ -99,23 +99,32 @@ window.show()
     Gtk.main()
 	end
 
-def notify(*args)
+def notify(args)
 	flags_map = {'CHANGE_TURN'=>0, 'WIN'=>1, 'STALEMATE'=>2, 'COLUMN_FULL'=>3, 'UNKNOWN_EXCEPTION'=>4 }
 
 	if(flags_map[args[0]] == 0)
 
 		board = args[1]
-		message = args[2]
-	
+		player = args[2]
+		if player == 1
+			message = "Host"
+		else
+			message = "Guest"
+		end
 		update(board)
 		
 		# Play Continues	
-		@builder.get_object("label1").text = message + " take your turn."
+		@builder.get_object("label1").text = message " take your turn."
 	
 	elsif(flags_map[args[0]] == 1) 
 		# Declare the Winner in the Info box up top
 		board = args[1]
-		message = args[2]
+		player = args[2]
+		if player == 1
+			message = "Host"
+		else
+			message = "Guest"
+		end
 
 		update(board)
 
