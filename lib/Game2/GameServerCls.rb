@@ -52,7 +52,7 @@ class GameServerCls
       sleep(1)
     end
 
-    #@log.debug(notificationNum.to_s + '\'th notification for ' + gameName + 'is processing')
+    @log.debug(notificationNum.to_s + '\'th notification for ' + gameName + 'is processing')
 
     notification.each_with_index { |item, index|
       if item.is_a? Board
@@ -66,7 +66,7 @@ class GameServerCls
       _stalemate(gameName)
     end
 
-    #@log.debug(notificationNum.to_s + '\'th notification for ' + gameName + 'is sending')
+    @log.debug(notificationNum.to_s + '\'th notification for ' + gameName + 'is sending')
 
     return notification
   end
