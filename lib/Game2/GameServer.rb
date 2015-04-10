@@ -15,26 +15,11 @@ module GameServer
     else
       raise 'wrong number of arguments'
     end
-    server = XMLRPC::Server.new(port, ENV['HOSTNAME'])
-    server.add_handler(GameServerCls::INTERFACE, GameServerCls.new, 10)
+    server = XMLRPC::Server.new(port, ENV['HOSTNAME'], 10)
+    server.add_handler(GameServerCls::INTERFACE, GameServerCls.new)
 
-    pid = fork do
-      Signal.trap("SIGINT") do
-        server.shutdown
-        puts 'server shutdown'
-      end
-      server.serve
-    end
+    server.serve
 
-    while true
-      inp = gets
-      puts inp
-      inp == 'quit'
-      #if inp == 'quit'
-      #  puts 'hi'
-      Process.kill("SIGINT",pid)
-      #end
-    end
   end
 
   

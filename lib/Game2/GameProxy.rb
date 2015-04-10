@@ -7,12 +7,15 @@ PLAYER_1_PIECE = 1
 PLAYER_2_PIECE = 2
 
 class GameProxy
-  def initialize(name,gameType,dimensions,notificationCacheSize=5)
+  def initialize(name,gameType,dimensions,databaseProxy,logger,notificationCacheSize=5)
     #@observers = []
+    @name = name
     @players = Hash.new # player names mapped to boolean indicating if they have joined or not
     @notifications = Hash.new # a list of notifications to send. Keyed on notification number, valued on the notification itself
     @notificationCacheSize = notificationCacheSize
     @notificationCount = 0
+    @databaseProxy = databaseProxy
+    @log = logger
     factory = GameFactory.new
     begin
       @game = factory.createGame(gameType,PLAYER_1_PIECE,PLAYER_2_PIECE,dimensions)
@@ -32,16 +35,37 @@ class GameProxy
       @notifications.delete(@notifications.keys.min)
     end
     @notificationCount += 1
+
+
+    if args[0] == Game.WIN_FLAG
+      _winGame(args[2])
+    elsif args[0] == Game.STALEMATE_FLAG
+      _stalemate
+    end
+
   end
 
   def getNotification(index)
     if @notifications.keys.min > index
       #TODO raise an error
     end
+
     if @notifications.has_key? index
       return @notifications[index]
     end
+
     return false
+  end
+
+  def _winGame(winner)
+    @log.debug('player "' + winner.to_s + '" has won game "' + @name.to_s + '"')
+    @databaseProxy.addWin(winner)
+    otherPlayer = players.keys.select {|user| user != winner}
+    @databaseProxy.addLoss(otherPlayer[0])
+  end
+
+  def _stalemate
+    players.keys.each {|user| @databaseProxy.addTie(user)}
   end
 
   # add a player name to the game and return true. If there are already
@@ -93,6 +117,10 @@ class GameProxy
 
   def _allPlayersPresent
     @players.values.all? {|p| p }
+  end
+
+  def nPlayersPresent
+    @players.values.count {|p| p}
   end
 
   def marshal_dump

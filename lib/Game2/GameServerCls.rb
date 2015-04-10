@@ -39,29 +39,31 @@ class GameServerCls
   end
 
   def getNotification(gameName, notificationNum)
-    #@log.debug('getting ' + notificationNum.to_s + '\'th notification for ' + gameName)
+    @log.debug('getting ' + notificationNum.to_s + '\'th notification for ' + gameName)
     notification = false
     while !notification and !@stopServer
       # poll for notificaion
-      notification = @gameSessions[gameName].getNotification(notificationNum)
       sleep(1)
+      notification = @gameSessions[gameName].getNotification(notificationNum)
+      if @gameSessions[gameName].nPlayersPresent == 0 # some extra cleanup
+        @gameSessions.delete(gameName)
+        return []
+      end
     end
 
-    @log.debug(notificationNum.to_s + '\'th notification for ' + gameName + 'is processing')
+    @log.debug(notificationNum.to_s + '\'th notification for ' + gameName + ' is processing')
 
     notification.each_with_index { |item, index|
       if item.is_a? Board
         notification[index] = notification[index].getBoard
       end
     }
-    # If the game is over, we can remove the game from the sessions, and add to the statistics
-    if notification[0] == Game.WIN_FLAG
-      _winGame(gameName,notification[2])
-    elsif notification[0] == Game.STALEMATE_FLAG
-      _stalemate(gameName)
+    if notification[0] == Game.UNKNOWN_EXCEPTION
+      notification[1] = notification[1].to_s
+      @log.debug('exception has occured: ' + notification[1])
     end
 
-    @log.debug(notificationNum.to_s + '\'th notification for ' + gameName + 'is sending')
+    @log.debug(notificationNum.to_s + '\'th notification for ' + gameName + ' is sending')
 
     return notification
   end
@@ -70,7 +72,7 @@ class GameServerCls
     @log.debug('hosting game ' + gameName + '. Host user: ' + userName + '. Game Type: ' + gameType + '. Dimensions: ' + dimensions.to_s)
     if @gameCount < @maxGames # start a new game
       begin
-        @gameSessions[gameName] = GameProxy.new(gameName,gameType,dimensions)
+        @gameSessions[gameName] = GameProxy.new(gameName,gameType,dimensions,@databaseProxy,@log)
         return @gameSessions[gameName].addPlayer(userName)
       rescue
         @log.debug('game creation step failed for game: ' + gameName + '. Host user: ' + userName + '. Game Type: ' + gameType + '. Dimensions: ' + dimensions.to_s)
@@ -161,25 +163,6 @@ class GameServerCls
 
   # tell anyone listening that it's time to shut down the server
   def sendShutdownNotification
-  end
-
-  # this is the listener for the board.
-  #def notify(*args)
-  #  # TODO: forward notifications onto clients, and if notification is that the game has finished, add to the database
-  #  puts args
-  #  #@log.debug(args)
-  #end
-
-  def _winGame(gameName,winner)
-    @databaseProxy.addWin(winner)
-    otherPlayer = @gameSessions[gameName].players.keys.select {|user| user != winner}
-    @databaseProxy.addLoss(otherPlayer[0])
-    @gameSessions.delete(gameName)
-  end
-
-  def _stalemate(gameName)
-    @gameSessions[gameName].players.keys.each {|user| @databaseProxy.addTie(user)}
-    @gameSessions.delete(gameName)
   end
 
 end

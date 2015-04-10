@@ -7,6 +7,7 @@ class GameClientObj
 		@path = path
 		@port = port
 		#@server = server
+		#@server = XMLRPC::Client.new(@host, @path, @port, nil, nil, nil, nil, nil, 9999)
 		#@serverProxy = @server.proxy('game')
 		@printMutex = Mutex.new
 		@gameName = nil
@@ -15,10 +16,12 @@ class GameClientObj
 
 	def server
 		XMLRPC::Client.new(@host, @path, @port, nil, nil, nil, nil, nil, 9999)
+		#@server
 	end
 
 	def serverProxy
 		server.proxy('game')
+		#@serverProxy
 	end
 
 	def start

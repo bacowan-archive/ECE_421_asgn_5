@@ -50,7 +50,7 @@ class Game
 
   # place a piece in the given column
   def placePiece(column)
-    begin
+    #begin
       newPieceRow = @board.put(turn,column)
       if newPieceRow
         win = @winCondition.win(@board,newPieceRow,column)
@@ -65,9 +65,9 @@ class Game
       else
         _notifyObservers(Game.COLUMN_FULL_FLAG)
       end
-    rescue Exception => e
-      _notifyObservers(Game.UNKNOWN_EXCEPTION, e)
-    end
+    #rescue Exception => e
+    #  _notifyObservers(Game.UNKNOWN_EXCEPTION, e)
+    #end
 
   end
 
