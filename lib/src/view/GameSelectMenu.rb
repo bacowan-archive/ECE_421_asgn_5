@@ -99,10 +99,12 @@ class GameMenu
 		end
 		if @gameName != nil and @userName != nil
 			ret = @client.hostGame(@gameName,@userName,gameType,[6,7])
-			if ret == true
+			if ret == ''
 				new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName, 1)
 			else
-				puts "Failed to Connect\n"
+				popup = Gtk::MessageDialog.new(self,:modal,:error,:close,"Error: " + ret)
+				popup.run
+				popup.destroy
 			end
 		end
 	end
@@ -113,8 +115,14 @@ class GameMenu
 		@userName = nil
 		screen = HostScreen.new(self)
 		if @gameName != nil and @userName != nil
-			@client.connectToGame(@gameName,@userName)
-			new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName, 2)
+			ret = @client.connectToGame(@gameName,@userName)
+			if ret == ''
+				new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName, 2)
+			else
+				popup = Gtk::MessageDialog.new(self,:modal,:error,:close,"Error: " + ret)
+				popup.run
+				popup.destroy
+			end
 		end
 	end
 
@@ -125,14 +133,20 @@ class GameMenu
 		screen = HostScreen.new(self)
 		if @gameName != nil and @userName != nil		
 			ret = @client.loadGame(@gameName, @userName)
-			@choices[0] = ret[0]
-			if ret[1] == @userName
-				host = 1
+			if ret[0] == false
+				popup = Gtk::MessageDialog.new(self,:modal,:error,:close,"Error: " + ret[1])
+				popup.run
+				popup.destroy
 			else
-				host = 2
+				@choices[0] = ret[0]
+				if ret[1] == @userName
+					host = 1
+				else
+					host = 2
+				end
+				puts 'gameName: ' + @gameName
+				new_game = MultiplayerGameBoard.new(@client,@choices,@gameName,@userName, host)
 			end
-			puts 'gameName: ' + @gameName
-			new_game = MultiplayerGameBoard.new(@client,@choices,@gameName,@userName, host)
 		end	
 	end
 

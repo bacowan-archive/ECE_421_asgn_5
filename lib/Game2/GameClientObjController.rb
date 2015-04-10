@@ -49,6 +49,7 @@ class GameClientObjController
 		if ret == true
 			@gameName = gameName
 		end
+		return ret
 	end
 
 	def hostGame(gameName, userName, gameType, dims)
