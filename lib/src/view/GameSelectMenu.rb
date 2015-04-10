@@ -27,7 +27,8 @@ class GameMenu
 # Step 1: get the window to terminate the program when it's destroyed
 #
     window = @builder.get_object("window1")
-    window.signal_connect( "destroy" ) { Gtk.main_quit }
+    window.signal_connect( "destroy" ) { @client.quit(@gameName, @userName)
+Gtk.main_quit }
 
 # Step 2: get the exit button to terminate the program when it's activated
     exit_button = @builder.get_object("button2")
@@ -102,7 +103,7 @@ class GameMenu
 			if ret == ''
 				new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName, 1)
 			else
-				popup = Gtk::MessageDialog.new(self,:modal,:error,:close,"Error: " + ret)
+				popup = Gtk::MessageDialog.new(nil,:modal,:error,:close,"Error: " + ret)
 				popup.run
 				popup.destroy
 			end
@@ -119,7 +120,7 @@ class GameMenu
 			if ret == ''
 				new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName, 2)
 			else
-				popup = Gtk::MessageDialog.new(self,:modal,:error,:close,"Error: " + ret)
+				popup = Gtk::MessageDialog.new(nil,:modal,:error,:close,"Error: " + ret)
 				popup.run
 				popup.destroy
 			end
@@ -134,7 +135,7 @@ class GameMenu
 		if @gameName != nil and @userName != nil		
 			ret = @client.loadGame(@gameName, @userName)
 			if ret[0] == false
-				popup = Gtk::MessageDialog.new(self,:modal,:error,:close,"Error: " + ret[1])
+				popup = Gtk::MessageDialog.new(nil,:modal,:error,:close,"Error: " + ret[1])
 				popup.run
 				popup.destroy
 			else

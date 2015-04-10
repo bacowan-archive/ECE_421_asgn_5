@@ -46,7 +46,7 @@ class GameClientObjController
 
 	def connectToGame(gameName,userName)
 		ret = serverProxy.connectToGame(gameName,userName)
-		if ret == true
+		if ret == ''
 			@gameName = gameName
 		end
 		return ret
@@ -54,7 +54,7 @@ class GameClientObjController
 
 	def hostGame(gameName, userName, gameType, dims)
 		ret =  serverProxy.hostGame(gameName,userName,gameType,[dims[0].to_i,dims[1].to_i])
-		if ret == true
+		if ret == ''
 			@gameName = gameName
 		end
 		return ret
@@ -62,7 +62,7 @@ class GameClientObjController
 
 	def loadGame(gameName, userName)
 		ret = serverProxy.loadGame(gameName,userName)
-		if ret[0] != ''
+		if ret[0] != false
 			@gameName = gameName
 		end
 		return ret
