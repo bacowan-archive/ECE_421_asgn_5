@@ -9,6 +9,7 @@ PLAYER_2_PIECE = 2
 class GameProxy
   def initialize(name,gameType,dimensions,databaseProxy,logger,notificationCacheSize=5)
     #@observers = []
+    @hostUser = ''
     @name = name
     @players = Hash.new # player names mapped to boolean indicating if they have joined or not
     @notifications = Hash.new # a list of notifications to send. Keyed on notification number, valued on the notification itself
@@ -33,6 +34,10 @@ class GameProxy
     @game.winCondition.getName
   end
 
+  def hostUser
+    @hostUser
+  end
+
   def notify(*args)
     @notifications[@notificationCount] = args
     if @notifications.size > @notificationCacheSize
@@ -53,6 +58,9 @@ class GameProxy
     if @notifications.keys.min > index
       #TODO raise an error
     end
+
+    print @notifications
+    puts ''
 
     if @notifications.has_key? index
       return @notifications[index]
@@ -79,6 +87,10 @@ class GameProxy
       return false
     end
     @players[playerName] = true
+    # the first player to join is the host
+    if @players.length == 1
+      @hostUser = playerName
+    end
     _canStart
     @game.sendInitialNotification
     return true
@@ -129,11 +141,11 @@ class GameProxy
   end
 
   def marshal_dump
-    [@players.keys,@game,@notifications,@notificationCacheSize,@notificationCount]
+    [@players.keys,@game,@notifications,@notificationCacheSize,@notificationCount,@hostUser]
   end
 
   def marshal_load(array)
-    keys, @game, @notifications, @notificationCacheSize, @notificationCount = array
+    keys, @game, @notifications, @notificationCacheSize, @notificationCount, @hostUser = array
     # reset the notifications (only store the latest one)
     lastNotification = @notifications[@notifications.keys.max]
     @notifications = Hash.new

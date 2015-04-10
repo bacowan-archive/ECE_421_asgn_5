@@ -60,8 +60,8 @@ class GameClientObjController
 
 	def loadGame(gameName, userName)
 		ret = serverProxy.loadGame(gameName,userName)
-		if ret != ''
-			@gameName = ret
+		if ret[0] != ''
+			@gameName = ret[0]
 		end
 		return ret
 	end
@@ -70,8 +70,10 @@ class GameClientObjController
 	def _notifications
 		puts 'notificaitons!'
 		Thread.new {
+			puts 'there'
 			while !@done
-				puts @gameName
+				puts 'here'
+				puts 'game name: ' + @gameName
 				if @gameName != nil
 					_getNotification
 				end

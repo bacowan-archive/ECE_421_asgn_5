@@ -17,7 +17,7 @@ class GameServerCls
     meth 'Hash getStats()', 'get the stats of the "tournament"', 'getStats'
     meth 'boolean connectToGame(String, String)', 'connect to the game of the first string, as the user of the second string', 'connectToGame'
     meth 'boolean hostGame(String, String, String, Array)', 'host a game as a user of the given string, and the game type of the third string'
-    meth 'String loadGame(String, String)', 'load the game of the first string as the user of the second string. Return the game type', 'loadGame'
+    meth 'Array loadGame(String, String)', 'load the game of the first string as the user of the second string. Return the game type, and the username of the host user.', 'loadGame'
   }
 
   # first param: max games that can take place at once
@@ -43,9 +43,13 @@ class GameServerCls
     notification = false
     while !notification and !@stopServer
       # poll for notificaion
+      puts 'inside'
       sleep(1)
+      puts gameName
+      puts @gameSessions
       notification = @gameSessions[gameName].getNotification(notificationNum)
       if @gameSessions[gameName].nPlayersPresent == 0 # some extra cleanup
+        puts 'oh no!'
         @gameSessions.delete(gameName)
         return []
       end
@@ -140,22 +144,23 @@ class GameServerCls
     begin
       if @gameCount >= @maxGames
         @log.debug('too many games already in session to load game "' + gameName + '"')
-        return ''
+        return [false,false]
       end
       game = @databaseProxy.loadGame(gameName)
       if game == nil
         @log.debug('game "' + gameName + '" could not be loaded')
-        return ''
+        return [false,false]
       end
       @gameSessions[gameName] = Marshal.load(game)
       puts 'adding player'
       @gameSessions[gameName].addPlayer(username)
     rescue Mysql::Error => e
-      return ''
+      return [false,false]
       @log.debug('game "' + gameName + '" could not be loaded due to sql error: ' + e.to_s)
     end
     @log.debug('game "' + gameName + '" has been loaded with user "' + username + '" hosting')
-    return @gameSessions[gameName].gameType
+    puts [@gameSessions[gameName].gameType,@gameSessions[gameName].hostUser]
+    return [@gameSessions[gameName].gameType,@gameSessions[gameName].hostUser]
   end
 
   def getStats

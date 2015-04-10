@@ -104,12 +104,15 @@ class GameMenu
 	def load_game
 		getChoices()
 		screen = HostScreen.new(self)
-<<<<<<< HEAD
-		@client.loadGame(@gameName, @username)
-=======
-		@choices[] = @client.load(@gameName, @username)
->>>>>>> fcd29114832e199ec06ad473db20aa24cd10af39
-		new_game = MultiplayerGameBoard.new(@client,@choices,@gameName,@userName)
+		ret = @client.loadGame(@gameName, @userName)
+		@choices[0] = ret[0]
+		if ret[1] == @userName
+			host = 1
+		else
+			host = 2
+		end
+		puts 'gameName: ' + @gameName
+		new_game = MultiplayerGameBoard.new(@client,@choices,@gameName,@userName, host)
 	end
 
 	def setNames(gameName, userName)
