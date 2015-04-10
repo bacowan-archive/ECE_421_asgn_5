@@ -138,7 +138,7 @@ class GameProxy
   end
 
   def marshal_dump
-    if @notificationCount = 0
+    if @notificationCount == 0
       cnt = 0
     else
       cnt = 1
