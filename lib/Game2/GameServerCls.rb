@@ -102,7 +102,7 @@ class GameServerCls
     begin
       ret = @gameSessions[gameName].put(column)
       @log.debug('piece in game "' + gameName + '" in column ' + column.to_s + ' has been placed')
-      return 
+      return ret
     rescue
       @log.debug('something went wrong when placing piece in game "' + gameName + '" in column "' + column.to_s)
     end
@@ -111,7 +111,7 @@ class GameServerCls
 
   def quit(gameName, username)
     @log.debug('player "' + username + '" is leaving game "' + gameName + '"')
-    if @gameSessions[gameName].playerLeave(userName)
+    if @gameSessions[gameName].playerLeave(username)
       notify([OTHER_PLAYER_LEFT_TOKEN])
       @log.debug('player "' + username + '" has left game "' + gameName + '"')
       return true
