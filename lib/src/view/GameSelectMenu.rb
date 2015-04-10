@@ -3,6 +3,7 @@ require_relative 'GameBoard.rb'
 require_relative '../view/Host_Screen.rb'
 require_relative '../../Game2/GameClientObjController.rb'
 require_relative '../view/MultiplayerGameBoard.rb'
+require_relative '../view/StatScreen.rb'
 
 class GameMenu
 
@@ -37,7 +38,7 @@ class GameMenu
     start_button.signal_connect("clicked"){
 		
 	start_game
-	window.destroy
+	
 		
     }
 
@@ -46,7 +47,7 @@ class GameMenu
 	host_button.signal_connect("clicked"){
 
 		host_game
-		window.destroy	
+			
 	}
 
 # Step 5: get the Join Game Button
@@ -54,14 +55,22 @@ class GameMenu
 	join_button.signal_connect("clicked"){
 
 		join_game
-		window.destroy
+		
 	}
 
 # Step 5: load Game Button
 	load_button = @builder.get_object("button5")
 	load_button.signal_connect("clicked"){
 		load_game
-		window.destroy
+		
+		
+	}
+
+# Step 6: stats Button
+	stat_button = @builder.get_object("button6")
+	stat_button.signal_connect("clicked"){
+		stats
+		
 		
 	}
 
@@ -106,6 +115,10 @@ class GameMenu
 		screen = HostScreen.new(self)
 		@choices[0] = @client.loadGame(@gameName, @username)
 		new_game = MultiplayerGameBoard.new(@client,@choices,@gameName,@userName)
+	end
+
+	def stats
+		screen = StatScreen.new(@client)	
 	end
 
 	def setNames(gameName, userName)
