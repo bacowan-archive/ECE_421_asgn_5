@@ -15,8 +15,8 @@ class GameServerCls
     meth 'boolean quit(String, String)', 'quit the game and disconnect from the server', 'quit'
     meth 'boolean save()', 'save the current game state', 'save'
     meth 'Hash getStats()', 'get the stats of the "tournament"', 'getStats'
-    meth 'boolean connectToGame(String, String)', 'connect to the game of the first string, as the user of the second string', 'connectToGame'
-    meth 'boolean hostGame(String, String, String, Array)', 'host a game as a user of the given string, and the game type of the third string'
+    meth 'String connectToGame(String, String)', 'connect to the game of the first string, as the user of the second string', 'connectToGame'
+    meth 'String hostGame(String, String, String, Array)', 'host a game as a user of the given string, and the game type of the third string'
     meth 'Array loadGame(String, String)', 'load the game of the first string as the user of the second string. Return the game type, and the username of the host user.', 'loadGame'
   }
 
@@ -38,6 +38,7 @@ class GameServerCls
     @log.debug('server started')
   end
 
+  # asynchronously get a notification. Note that this function must be called asynchronously from the client
   def getNotification(gameName, notificationNum)
     @log.debug('getting ' + notificationNum.to_s + '\'th notification for ' + gameName)
     notification = false
@@ -47,7 +48,7 @@ class GameServerCls
       notification = @gameSessions[gameName].getNotification(notificationNum)
       if @gameSessions[gameName].nPlayersPresent == 0 # some extra cleanup
         @gameSessions.delete(gameName)
-        return []
+        return [Game.UNKNOWN_EXCEPTION]
       end
     end
 
@@ -73,14 +74,17 @@ class GameServerCls
     if @gameCount < @maxGames # start a new game
       begin
         @gameSessions[gameName] = GameProxy.new(gameName,gameType,dimensions,@databaseProxy,@log)
-        return @gameSessions[gameName].addPlayer(userName)
+        @gameSessions[gameName].addPlayer(userName)
+        return ''
       rescue
-        @log.debug('game creation step failed for game: ' + gameName + '. Host user: ' + userName + '. Game Type: ' + gameType + '. Dimensions: ' + dimensions.to_s)
-        return false # TODO: make this a custom error
+        message = 'game creation step failed for game: ' + gameName + '. Host user: ' + userName + '. Game Type: ' + gameType + '. Dimensions: ' + dimensions.to_s
+        @log.debug(message)
+        return message # TODO: make this a custom error
       end
     end
-    @log.debug('cound not host game: ' + gameName + '. Limit for number of games on server met.')
-    return false
+    message = 'cound not host game: ' + gameName + '. Limit for number of games on server met.'
+    @log.debug(message)
+    return message
   end
 
   # gameName: the name of the game to join
@@ -89,14 +93,16 @@ class GameServerCls
     @log.debug('connecting to game: ' + gameName + ' as user: ' + userName)
     if @gameSessions.has_key?(gameName) # join the existing game
       if not @gameSessions[gameName].addPlayer(userName)
-        @log.debug('game "' + gameName + '" is full, and user "' + userName + '" is not a part of the game')
-        return false
+        message = 'game "' + gameName + '" is full, and user "' + userName + '" is not a part of the game'
+        @log.debug(message)
+        return message
       end
       @log.debug('user "' + userName + '" has connected to game "' + gameName + '"')
-      return true
+      return ''
     end # no such game
-    @log.debug('game "' + gameName + '" does not exist')
-    return false
+    message = 'game "' + gameName + '" does not exist'
+    @log.debug(message)
+    return message
   end
 
   def put(gameName, column)
@@ -139,19 +145,22 @@ class GameServerCls
     @log.debug('trying to load game "' + gameName + '", with user "' + username + '" hosting')
     begin
       if @gameCount >= @maxGames
-        @log.debug('too many games already in session to load game "' + gameName + '"')
-        return [false,false]
+        message = 'too many games already in session to load game "' + gameName + '"'
+        @log.debug(message)
+        return [false,message]
       end
       game = @databaseProxy.loadGame(gameName)
       if game == nil
-        @log.debug('game "' + gameName + '" could not be loaded')
-        return [false,false]
+        message = 'game "' + gameName + '" could not be loaded. Perhaps the game was never saved, or never existed.'
+        @log.debug(message)
+        return [false,message]
       end
       @gameSessions[gameName] = Marshal.load(game)
       @gameSessions[gameName].addPlayer(username)
     rescue Mysql::Error => e
-      return [false,false]
-      @log.debug('game "' + gameName + '" could not be loaded due to sql error: ' + e.to_s)
+      message = 'game "' + gameName + '" could not be loaded due to sql error: ' + e.to_s
+      @log.debug(message)
+      return [false,message]
     end
     @log.debug('game "' + gameName + '" has been loaded with user "' + username + '" hosting')
     return [@gameSessions[gameName].gameType,@gameSessions[gameName].hostUser]
