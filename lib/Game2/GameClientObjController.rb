@@ -59,13 +59,19 @@ class GameClientObjController
 	end
 
 	def loadGame(gameName, userName)
-		ret =  serverProxy.loadGame(gameName,userName)
+		ret = serverProxy.loadGame(gameName,userName)
+		if ret != ''
+			@gameName = ret
+		end
+		return ret
 	end
 	
 
 	def _notifications
+		puts 'notificaitons!'
 		Thread.new {
 			while !@done
+				puts @gameName
 				if @gameName != nil
 					_getNotification
 				end
@@ -75,6 +81,7 @@ class GameClientObjController
 	end
 
 	def _getNotification
+		puts 'getting notification!'
 		temp = server.call_async('game.getNotification', @gameName, @notificationCount )
 		temp.each{|e| 
 			print e

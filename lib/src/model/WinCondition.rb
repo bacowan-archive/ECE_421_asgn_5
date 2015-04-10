@@ -7,6 +7,10 @@ class WinCondition
     @p2 = p2
   end
 
+  def getName
+    @winCondition.getName
+  end
+
   # if the win condition has been met, return false. Otherwise, return the user
   # who wins.
   # input:

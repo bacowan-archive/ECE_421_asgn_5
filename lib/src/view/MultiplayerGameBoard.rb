@@ -15,7 +15,7 @@ class MultiplayerGameBoard
 	
 #get inputs from the select menu
 	@win = 0
-	if choices[0] == "Connect4"
+	if choices[0] == "Connect4" or choices[0] == ConnectFourWinCondition.name
 		gameType = ConnectFourWinCondition.name
 		player1Piece = 1
 		player2Piece = 2

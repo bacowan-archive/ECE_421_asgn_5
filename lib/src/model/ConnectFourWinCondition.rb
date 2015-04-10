@@ -4,6 +4,10 @@ class ConnectFourWinCondition
     'CONNECT_FOUR'
   end
 
+  def getName
+    ConnectFourWinCondition.name
+  end
+
   def checkCondition(items,p1,p2)
     if items.all? {|x| x == p1}
       return p1

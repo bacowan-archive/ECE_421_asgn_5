@@ -17,7 +17,7 @@ class GameServerCls
     meth 'Hash getStats()', 'get the stats of the "tournament"', 'getStats'
     meth 'boolean connectToGame(String, String)', 'connect to the game of the first string, as the user of the second string', 'connectToGame'
     meth 'boolean hostGame(String, String, String, Array)', 'host a game as a user of the given string, and the game type of the third string'
-    meth 'boolean loadGame(String, String)', 'load the game of the first string as the user of the second string', 'loadGame'
+    meth 'String loadGame(String, String)', 'load the game of the first string as the user of the second string. Return the game type', 'loadGame'
   }
 
   # first param: max games that can take place at once
@@ -140,21 +140,22 @@ class GameServerCls
     begin
       if @gameCount >= @maxGames
         @log.debug('too many games already in session to load game "' + gameName + '"')
-        return false
+        return ''
       end
       game = @databaseProxy.loadGame(gameName)
       if game == nil
         @log.debug('game "' + gameName + '" could not be loaded')
-        return false
+        return ''
       end
       @gameSessions[gameName] = Marshal.load(game)
+      puts 'adding player'
       @gameSessions[gameName].addPlayer(username)
     rescue Mysql::Error => e
-      return false
+      return ''
       @log.debug('game "' + gameName + '" could not be loaded due to sql error: ' + e.to_s)
     end
     @log.debug('game "' + gameName + '" has been loaded with user "' + username + '" hosting')
-    return true
+    return @gameSessions[gameName].gameType
   end
 
   def getStats

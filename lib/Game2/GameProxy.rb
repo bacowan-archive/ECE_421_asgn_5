@@ -29,6 +29,10 @@ class GameProxy
     return @players
   end
 
+  def gameType
+    @game.winCondition.getName
+  end
+
   def notify(*args)
     @notifications[@notificationCount] = args
     if @notifications.size > @notificationCacheSize
@@ -76,6 +80,7 @@ class GameProxy
     end
     @players[playerName] = true
     _canStart
+    @game.sendInitialNotification
     return true
   end
 
@@ -110,9 +115,9 @@ class GameProxy
 
   # if we can start the game (all players are there), send out the initial notification
   def _canStart
-    if _allPlayersPresent
-      @game.sendInitialNotification
-    end
+    #if _allPlayersPresent
+      #@game.sendInitialNotification
+    #end
   end
 
   def _allPlayersPresent
@@ -129,8 +134,12 @@ class GameProxy
 
   def marshal_load(array)
     keys, @game, @notifications, @notificationCacheSize, @notificationCount = array
+    # reset the notifications (only store the latest one)
+    lastNotification = @notifications[@notifications.keys.max]
+    @notifications = Hash.new
+    @notifications[0] = @notifications.keys.max
     @players = Hash.new
-    keys[0].each {|k| @players[k] = false}
+    keys.each {|k| @players[k] = false}
     @game.addObserver(self)
   end
 
