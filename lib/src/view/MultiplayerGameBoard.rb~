@@ -7,15 +7,17 @@ require_relative '../model/AIFactory.rb'
 
 
 class MultiplayerGameBoard
-	def initialize(client, choices, gameName, userName)
+	def initialize(client, choices, gameName, userName, host)
 	 @client = client
 	 @client.setView(self)
 	 @gameName = gameName
 	 @userName = userName
+	 @host = host
+	 @player = nil
 	
 #get inputs from the select menu
 	@win = 0
-	if choices[0] == "Connect4"
+	if choices[0] == "Connect4" or choices[0] == ConnectFourWinCondition.name
 		gameType = ConnectFourWinCondition.name
 		player1Piece = 1
 		player2Piece = 2
@@ -104,8 +106,8 @@ def notify(args)
 	puts args[0]
 	if(flags_map[args[0]] == 0)
 		board = args[1]
-		player = args[2]
-		if player == 1
+		@player = args[2]
+		if @player == 1
 			message = "Host"
 		else
 			message = "Guest"
@@ -118,8 +120,8 @@ def notify(args)
 	elsif(flags_map[args[0]] == 1) 
 		# Declare the Winner in the Info box up top
 		board = args[1]
-		player = args[2]
-		if player == 1
+		@player = args[2]
+		if @player == 1
 			message = "Host"
 		else
 			message = "Guest"
@@ -149,8 +151,8 @@ def notify(args)
 end
 
 def play_move(col)
-	if @win == 0
-		@client.put(@gameName, col)
+	if @win == 0 and @host == @player
+		@client.put(@gameName, col-1)
 	else
 		a=1
 	end
