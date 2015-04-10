@@ -62,7 +62,7 @@ class GameClientObjController
 	def loadGame(gameName, userName)
 		ret = serverProxy.loadGame(gameName,userName)
 		if ret[0] != ''
-			@gameName = ret[0]
+			@gameName = gameName
 		end
 		return ret
 	end
