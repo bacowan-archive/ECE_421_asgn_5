@@ -1,4 +1,4 @@
-require_relative 'view/GameSelectMenu.rb'
+require_relative 'src/view/GameSelectMenu.rb'
 module Board_Games
 	def playGames
 		menu = GameMenu.new
