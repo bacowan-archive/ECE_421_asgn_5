@@ -7,15 +7,17 @@ require_relative '../model/AIFactory.rb'
 
 
 class MultiplayerGameBoard
-	def initialize(client, choices, gameName, userName)
+	def initialize(client, choices, gameName, userName, host)
 	 @client = client
 	 @client.setView(self)
 	 @gameName = gameName
 	 @userName = userName
+	 @host = host
+	 @player = nil
 	
 #get inputs from the select menu
 	@win = 0
-	if choices[0] == "Connect4"
+	if choices[0] == "Connect4" or choices[0] == ConnectFourWinCondition.name
 		gameType = ConnectFourWinCondition.name
 		player1Piece = 1
 		player2Piece = 2
@@ -101,33 +103,25 @@ window.show()
 
 def notify(args)
 	flags_map = {'CHANGE_TURN'=>0, 'WIN'=>1, 'STALEMATE'=>2, 'COLUMN_FULL'=>3, 'UNKNOWN_EXCEPTION'=>4 }
-	args.each {|r|
-		print r
-		puts ''
-	}
 	puts args[0]
 	if(flags_map[args[0]] == 0)
-		puts 'got in!'
 		board = args[1]
-		player = args[2]
-		if player == 1
+		@player = args[2]
+		if @player == 1
 			message = "Host"
 		else
 			message = "Guest"
 		end
-		puts 'updating'
 		update(board)
-		puts 'done updating'
 		
 		# Play Continues
-		puts 'yeah'
-		@builder.get_object("label1").text = message + " take your turn."
+		@builder.get_object("label1").text = message + " take your turn." 
 	
 	elsif(flags_map[args[0]] == 1) 
 		# Declare the Winner in the Info box up top
 		board = args[1]
-		player = args[2]
-		if player == 1
+		@player = args[2]
+		if @player == 1
 			message = "Host"
 		else
 			message = "Guest"
@@ -157,8 +151,8 @@ def notify(args)
 end
 
 def play_move(col)
-	if @win == 0
-		@client.put(@gameName, col)
+	if @win == 0 and @host == @player
+		@client.put(@gameName, col-1)
 	else
 		a=1
 	end

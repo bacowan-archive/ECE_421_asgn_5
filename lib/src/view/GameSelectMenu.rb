@@ -88,7 +88,7 @@ class GameMenu
 		end
 		ret = @client.hostGame(@gameName,@userName,gameType,[6,7])
 		if ret == true
-			new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName)
+			new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName, 1)
 		else
 			puts "Failed to Connect\n"
 		end
@@ -98,13 +98,13 @@ class GameMenu
 		getChoices()
 		screen = HostScreen.new(self)
 		@client.connectToGame(@gameName,@userName)
-		new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName)
+		new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName, 2)
 	end
 
 	def load_game
 		getChoices()
 		screen = HostScreen.new(self)
-		@client.load(@gameName, @username)
+		@choices[0] = @client.loadGame(@gameName, @username)
 		new_game = MultiplayerGameBoard.new(@client,@choices,@gameName,@userName)
 	end
 
