@@ -18,7 +18,7 @@ module GameServer
     server = XMLRPC::Server.new(port, ENV['HOSTNAME'])
     server.add_handler(GameServerCls::INTERFACE, GameServerCls.new, 10)
 
-    trap "SIGINT" do
+    Signal.trap("SIGINT") do
       server.shutdown
       puts 'server shutdown'
     end

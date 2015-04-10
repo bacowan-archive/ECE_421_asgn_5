@@ -20,10 +20,6 @@ class GameServerCls
     meth 'boolean loadGame(String, String)', 'load the game of the first string as the user of the second string', 'loadGame'
   }
 
-  #trap "SIGINT" do
-  #  puts 'yay!'
-  #end
-
   # first param: max games that can take place at once
   def initialize(*args)
     if args.length > 0
@@ -36,7 +32,6 @@ class GameServerCls
     @gameCount = 0 # number of games in session
     @database = DatabaseProxy.new
     @log = Logger.new(STDOUT)
-    #@log.level = Logger::WARN
     @stopServer = false
     @stopServerMutex = Mutex.new
     @databaseProxy = DatabaseProxy.new
@@ -44,7 +39,7 @@ class GameServerCls
   end
 
   def getNotification(gameName, notificationNum)
-    @log.debug('getting ' + notificationNum.to_s + '\'st notification for ' + gameName)
+    #@log.debug('getting ' + notificationNum.to_s + '\'th notification for ' + gameName)
     notification = false
     while !notification and !@stopServer
       # poll for notificaion
@@ -105,7 +100,9 @@ class GameServerCls
   def put(gameName, column)
     @log.debug('placing piece in game "' + gameName + '" in column ' + column.to_s)
     begin
-      return @gameSessions[gameName].put(column)
+      ret = @gameSessions[gameName].put(column)
+      @log.debug('piece in game "' + gameName + '" in column ' + column.to_s + ' has been placed')
+      return 
     rescue
       @log.debug('something went wrong when placing piece in game "' + gameName + '" in column "' + column.to_s)
     end

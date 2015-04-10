@@ -3,8 +3,8 @@
 
 require 'src/model/GameFactory'
 
-PLAYER_1_PIECE = '1'
-PLAYER_2_PIECE = '2'
+PLAYER_1_PIECE = 1
+PLAYER_2_PIECE = 2
 
 class GameProxy
   def initialize(name,gameType,dimensions,notificationCacheSize=5)
