@@ -47,14 +47,10 @@ class GameProxy
   # add a player name to the game and return true. If there are already
   # too many players, or that player has already joined, return false.
   def addPlayer(playerName)
-    puts 'players:'
-    puts @players
     if (!@players.has_key?(playerName) and @players.length > 1) or (@players.has_key?(playerName) and @players[playerName])
       return false
     end
-    puts 'set player'
     @players[playerName] = true
-    puts 'setted player'
     _canStart
     return true
   end
@@ -91,9 +87,7 @@ class GameProxy
   # if we can start the game (all players are there), send out the initial notification
   def _canStart
     if _allPlayersPresent
-      puts 'sending initial notification'
       @game.sendInitialNotification
-      puts 'initial notification sent'
     end
   end
 
@@ -102,13 +96,14 @@ class GameProxy
   end
 
   def marshal_dump
-    [@players.keys,@game,@notifications,@notificationsCacheSize,@notificationsCount]
+    [@players.keys,@game,@notifications,@notificationCacheSize,@notificationCount]
   end
 
   def marshal_load(array)
-    keys, @game, @notifications, @notificationsCacheSize, @notificationsCount = array
+    keys, @game, @notifications, @notificationCacheSize, @notificationCount = array
     @players = Hash.new
-    keys.each {|k| @players[k] = false}
+    keys[0].each {|k| @players[k] = false}
+    @game.addObserver(self)
   end
 
 
