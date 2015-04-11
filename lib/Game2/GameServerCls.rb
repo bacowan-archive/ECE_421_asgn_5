@@ -137,7 +137,7 @@ class GameServerCls
   def quit(gameName, username)
     @log.debug('player "' + username + '" is leaving game "' + gameName + '"')
     if @gameSessions[gameName].playerLeave(username)
-      notify([OTHER_PLAYER_LEFT_TOKEN])
+      #@notify([OTHER_PLAYER_LEFT_TOKEN])
       @log.debug('player "' + username + '" has left game "' + gameName + '"')
       return true
     end

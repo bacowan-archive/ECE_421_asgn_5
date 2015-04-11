@@ -17,10 +17,11 @@ def initialize(client)
 		window.destroy
   }
 
-  my_stats = "username wins lost ties\n"
+  #my_stats = "username wins lost ties\n"
 
   stats = @client.getStats()
-  stats.each{|item| my_stats = my_stats + item[0] + " " + item[1] + " " + item[2] + " " + item[3] + "\n"}
+  puts stats
+  stats.each{|item| my_stats = my_stats + item[0] + " has " + item[1] + " wins, " + item[2] + " losses, and " + item[3] + " ties.\n"}
 
   textView = @builder.get_object("textview1")
   buffer = textView.buffer
