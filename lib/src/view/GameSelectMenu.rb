@@ -147,7 +147,6 @@ Gtk.main_quit }
 				else
 					host = 2
 				end
-				puts 'gameName: ' + @gameName
 				new_game = MultiplayerGameBoard.new(@client,@choices,@gameName,@userName, host)
 			end
 		end	

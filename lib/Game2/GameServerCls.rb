@@ -15,7 +15,7 @@ class GameServerCls
 
   INTERFACE = XMLRPC::interface('game') {
     meth 'Array getNotification(String, int)', 'get a notification from the server when the server has one', 'getNotification'
-    meth 'array put(String, int)', 'put a piece (of the client) in the given column', 'put'
+    meth 'boolean put(String, int)', 'put a piece (of the client) in the given column', 'put'
     meth 'boolean quit(String, String)', 'quit the game and disconnect from the server', 'quit'
     meth 'boolean save()', 'save the current game state', 'save'
     meth 'Hash getStats()', 'get the stats of the "tournament"', 'getStats'
@@ -226,6 +226,10 @@ class GameServerCls
     _invariants
     _putPreconditions(gameName, column)
 
+    if @gameSessions[gameName].nPlayersPresent != 2
+      return false
+    end
+
     @log.debug('placing piece in game "' + gameName + '" in column ' + column.to_s)
     begin
       ret = @gameSessions[gameName].put(column)
@@ -235,16 +239,16 @@ class GameServerCls
       _putPostconditions
       _invariants
 
-      return ret
+      return true#ret
     rescue
       @log.debug('something went wrong when placing piece in game "' + gameName + '" in column "' + column.to_s)
     end
-    return [Game.UNKNOWN_EXCEPTION]
+    return false#[Game.UNKNOWN_EXCEPTION]
   end
 
 
 
-  def _quitPreconditions(gamenName,username)
+  def _quitPreconditions(gameName,username)
     begin
       assert(@gameSessions.has_key? gameName, 'game not in session')
       assert(@gameSessions[gameName].players[username], 'given user not in session')
@@ -267,7 +271,7 @@ class GameServerCls
   def quit(gameName, username)
 
     #preconditions and invariants
-    _quitPreconditions(gamenName,username)
+    _quitPreconditions(gameName,username)
     _invariants
 
     @log.debug('player "' + username + '" is leaving game "' + gameName + '"')
@@ -395,9 +399,12 @@ class GameServerCls
 
 
   def _invariants
-    assert(gameCount <= 5, 'too many games')
-    assert(@gameSessions.length <= 5, 'too many games')
-    @gameSessions.each {|s| assert(s.players.length <= 2, 'too many players') }
+    begin
+      assert(gameCount <= 5, 'too many games')
+      assert(@gameSessions.length <= 5, 'too many games')
+      @gameSessions.values.each {|s| assert(s.players.length <= 2, 'too many players') }
+    rescue
+    end
   end
 
 

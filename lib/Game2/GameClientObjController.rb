@@ -73,12 +73,8 @@ class GameClientObjController
 	
 
 	def _notifications
-		puts 'notificaitons!'
 		Thread.new {
-			puts 'there'
 			while !@done
-				puts 'here'
-				puts 'game name: ' + @gameName
 				if @gameName != nil
 					_getNotification
 				end
@@ -88,13 +84,8 @@ class GameClientObjController
 	end
 
 	def _getNotification
-		puts 'getting notification!'
 		temp = server.call_async('game.getNotification', @gameName, @notificationCount )
-		temp.each{|e| 
-			print e
-			puts ''}
 		@notificationCount += 1
-		puts "Notify called and returned\n"
 		@view.notify(temp)
 	end
 end

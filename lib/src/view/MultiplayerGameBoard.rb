@@ -103,7 +103,6 @@ window.show()
 
 def notify(args)
 	flags_map = {'CHANGE_TURN'=>0, 'WIN'=>1, 'STALEMATE'=>2, 'COLUMN_FULL'=>3, 'UNKNOWN_EXCEPTION'=>4 }
-	puts args[0]
 	if(flags_map[args[0]] == 0)
 		board = args[1]
 		@player = args[2]
