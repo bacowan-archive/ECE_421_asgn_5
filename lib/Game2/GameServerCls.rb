@@ -43,14 +43,31 @@ class GameServerCls
     @log.debug('server started')
   end
 
+
+
   def _getNotificationPreconditions(gameName,notificationNum)
-    #begin
-    #  assert(@gameSessions.has_key? gameName, 'game is not in the set of games')
-    #  assert(@gameSessions[gameName].
+    begin
+      assert(@gameSessions.has_key? gameName, 'game is not in the set of games')
+      assert(@gameSessions[gameName].getNotification, 'the notification being requested does not exist')
+    rescue
+      # we might get here if the first contract fails
+    end
+  end
+
+  def _getNotificationPostconditions(ret)
+    begin
+      assert(ret[0].is_a? String, 'the array being returned does not start with a string')
+    rescue
+    end
   end
 
   # asynchronously get a notification. Note that this function must be called asynchronously from the client
   def getNotification(gameName, notificationNum)
+
+    # preconditions and invariants
+    #_getNotificationPreconditions(gameName,notificationNum)
+    #_invariants    
+
     @log.debug('getting ' + notificationNum.to_s + '\'th notification for ' + gameName)
     notification = false
     while !notification and !@stopServer
@@ -59,7 +76,13 @@ class GameServerCls
       notification = @gameSessions[gameName].getNotification(notificationNum)
       if @gameSessions[gameName].nPlayersPresent == 0 # some extra cleanup
         @gameSessions.delete(gameName)
-        return [Game.UNKNOWN_EXCEPTION]
+        ret = [Game.UNKNOWN_EXCEPTION]
+
+        #post-conditions and invariants
+        #_invariants
+        #_getNotificationPostconditions(ret)
+        
+        return ret
       end
     end
 
@@ -77,9 +100,28 @@ class GameServerCls
 
     @log.debug(notificationNum.to_s + '\'th notification for ' + gameName + ' is sending')
 
+    #_getNotificationPostconditions(ret)
+    #_invariants
+
     return notification
   end
 
+
+
+
+
+  def _hostGamePreconditions(gameName,gameType)
+    begin
+      @_hostGamePreconditions_gameCount = @gameCount
+      assert_false(@gameSessions.has_key? gameName, 'game already in session')
+      assert_true(gameType == 'CONNECT_FOUR' or gameType == 'OTTO_TOOT')
+    rescue
+    end
+  end
+
+  #def _hostGamePostconditions
+  #  @
+  #end
 
   # start a new game
   def hostGame(gameName,userName,gameType,dimensions)
