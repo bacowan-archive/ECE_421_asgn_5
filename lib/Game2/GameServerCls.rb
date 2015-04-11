@@ -112,16 +112,16 @@ class GameServerCls
 
   def _hostGamePreconditions(gameName,gameType)
     begin
-      @_hostGamePreconditions_gameCount = gameCount
-      assert_false(@gameSessions.has_key? gameName, 'game already in session')
-      assert(((gameType == 'CONNECT_FOUR') or (gameType == 'OTTO_TOOT')), 'game type not valid')
+      #@_hostGamePreconditions_gameCount = gameCount
+      #assert_false(@gameSessions.has_key? gameName, 'game already in session')
+      #assert(((gameType == 'CONNECT_FOUR') or (gameType == 'OTTO_TOOT')), 'game type not valid')
     rescue
     end
   end
 
   def _hostGamePostconditions
     begin
-      assert_equal(@_hostGamePreconditions_gameCount+1,gameCount,'new game not added')
+      #assert_equal(@_hostGamePreconditions_gameCount+1,gameCount,'new game not added')
     rescue
     end
   end
@@ -144,7 +144,7 @@ class GameServerCls
         _invariants
 
         return ''
-      rescue
+      rescue => e
         message = 'game creation step failed for game: ' + gameName + '. Host user: ' + userName + '. Game Type: ' + gameType + '. Dimensions: ' + dimensions.to_s
         @log.debug(message)
         return message
