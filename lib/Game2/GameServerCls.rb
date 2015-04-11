@@ -34,7 +34,7 @@ class GameServerCls
     end
     @gameSessions = Hash.new # map of gameNames to their respective game connection info objects
     # TODO: make a lock around the hash, or make it multi-threaded (one for each game)
-    @gameCount = 0 # number of games in session
+    #gameCount = 0 # number of games in session
     @database = DatabaseProxy.new
     @log = Logger.new(STDOUT)
     @stopServer = false
@@ -65,8 +65,8 @@ class GameServerCls
   def getNotification(gameName, notificationNum)
 
     # preconditions and invariants
-    #_getNotificationPreconditions(gameName,notificationNum)
-    #_invariants    
+    _getNotificationPreconditions(gameName,notificationNum)
+    _invariants    
 
     @log.debug('getting ' + notificationNum.to_s + '\'th notification for ' + gameName)
     notification = false
@@ -79,8 +79,8 @@ class GameServerCls
         ret = [Game.UNKNOWN_EXCEPTION]
 
         #post-conditions and invariants
-        #_invariants
-        #_getNotificationPostconditions(ret)
+        _invariants
+        _getNotificationPostconditions(ret)
         
         return ret
       end
@@ -100,8 +100,8 @@ class GameServerCls
 
     @log.debug(notificationNum.to_s + '\'th notification for ' + gameName + ' is sending')
 
-    #_getNotificationPostconditions(ret)
-    #_invariants
+    _getNotificationPostconditions(ret)
+    _invariants
 
     return notification
   end
@@ -111,30 +111,43 @@ class GameServerCls
 
 
   def _hostGamePreconditions(gameName,gameType)
-    #begin
-    #  @_hostGamePreconditions_gameCount = @gameCount
-    #  assert_false(@gameSessions.has_key? gameName, 'game already in session')
-    #  assert_true(gameType == 'CONNECT_FOUR' or gameType == 'OTTO_TOOT')
-    #rescue
-    #end
+    begin
+      @_hostGamePreconditions_gameCount = gameCount
+      assert_false(@gameSessions.has_key? gameName, 'game already in session')
+      assert(((gameType == 'CONNECT_FOUR') or (gameType == 'OTTO_TOOT')), 'game type not valid')
+    rescue
+    end
   end
 
-  #def _hostGamePostconditions
-  #  @
-  #end
+  def _hostGamePostconditions
+    begin
+      assert_equal(@_hostGamePreconditions_gameCount+1,gameCount,'new game not added')
+    rescue
+    end
+  end
 
   # start a new game
   def hostGame(gameName,userName,gameType,dimensions)
+
+    # preconditions and invariants
+    _hostGamePreconditions(gameName,gameType)
+    _invariants
+
     @log.debug('hosting game ' + gameName + '. Host user: ' + userName + '. Game Type: ' + gameType + '. Dimensions: ' + dimensions.to_s)
-    if @gameCount < @maxGames # start a new game
+    if gameCount < @maxGames # start a new game
       begin
         @gameSessions[gameName] = GameProxy.new(gameName,gameType,dimensions,@databaseProxy,@log)
         @gameSessions[gameName].addPlayer(userName)
+
+        #postconditions and invariants
+        _hostGamePostconditions
+        _invariants
+
         return ''
       rescue
         message = 'game creation step failed for game: ' + gameName + '. Host user: ' + userName + '. Game Type: ' + gameType + '. Dimensions: ' + dimensions.to_s
         @log.debug(message)
-        return message # TODO: make this a custom error
+        return message
       end
     end
     message = 'cound not host game: ' + gameName + '. Limit for number of games on server met.'
@@ -143,10 +156,32 @@ class GameServerCls
   end
 
 
+
+
+  def _connectToGamePreconditions(gameName,userName)
+    begin
+      assert(@gameSessions.has_key? gameName, 'game not in session')
+      assert(@gameSessions[gameName].players.has_key? userName, 'given user not in session')
+    rescue
+    end
+  end
+
+  def _connectToGamePostconditions(gameName,userName)
+    begin
+      assert(@gameSessions[gameName].players[userName], 'given user was not added to the session')
+    rescue
+    end
+  end
+
   # connect to a game that has already been loaded onto the server
   # gameName: the name of the game to join
   # userName: the name of the user joining
   def connectToGame(gameName,userName)
+
+    #preconditions and invariants
+    _connectToGamePreconditions(gameName,userName)
+    _invariants
+
     @log.debug('connecting to game: ' + gameName + ' as user: ' + userName)
     if @gameSessions.has_key?(gameName) # join the existing game
       if not @gameSessions[gameName].addPlayer(userName)
@@ -155,6 +190,11 @@ class GameServerCls
         return [message]
       end
       @log.debug('user "' + userName + '" has connected to game "' + gameName + '"')
+
+      #postconditions and invariants
+      _connectToGamePostconditions(gameName,userName)
+      _invariants
+
       return ['', @gameSessions[gameName].gameType]
     end # no such game
     message = 'game "' + gameName + '" does not exist'
@@ -163,12 +203,38 @@ class GameServerCls
   end
 
 
+
+
+
+  def _putPreconditions(gameName, column)
+    begin
+      assert(@gameSessions.has_key? gameName, 'given game name does not exist')
+      assert(((@gameSessions[gameName].gameColumns > column) and (column >= 0)), 'column out of range')
+    rescue
+    end
+  end
+
+  def _putPostconditions
+    # if we get here, the we know that put was called. Further contracts
+    # are fulfilled in the game classes
+  end
+
   # place a piece in the given column of the given game
   def put(gameName, column)
+
+    #preconditions and invariants
+    _invariants
+    _putPreconditions(gameName, column)
+
     @log.debug('placing piece in game "' + gameName + '" in column ' + column.to_s)
     begin
       ret = @gameSessions[gameName].put(column)
       @log.debug('piece in game "' + gameName + '" in column ' + column.to_s + ' has been placed')
+
+      #postconditions and invariants
+      _putPostconditions
+      _invariants
+
       return ret
     rescue
       @log.debug('something went wrong when placing piece in game "' + gameName + '" in column "' + column.to_s)
@@ -177,12 +243,42 @@ class GameServerCls
   end
 
 
+
+  def _quitPreconditions(gamenName,username)
+    begin
+      assert(@gameSessions.has_key? gameName, 'game not in session')
+      assert(@gameSessions[gameName].players[username], 'given user not in session')
+    rescue
+    end
+  end
+
+  def _quitPostconditions(gameName,username)
+    begin
+      if @gameSessions.has_key? gameName
+        assert_false(@gameSessions[gameName].players[username], 'given user is in session')
+      else
+        assert_equal(@_hostGamePreconditions_gameCount-1,gameCount,'game not removed')
+      end
+    rescue
+    end
+  end
+
   # quit the game
   def quit(gameName, username)
+
+    #preconditions and invariants
+    _quitPreconditions(gamenName,username)
+    _invariants
+
     @log.debug('player "' + username + '" is leaving game "' + gameName + '"')
     if @gameSessions[gameName].playerLeave(username)
       #@notify([OTHER_PLAYER_LEFT_TOKEN])
       @log.debug('player "' + username + '" has left game "' + gameName + '"')
+
+      # postconditions and invariants
+      _invariants
+      _quitPostconditions(gameName,username)
+
       return true
     end
     @log.debug('something went wrong; player "' + username + '" could not leave game "' + gameName + '"')
@@ -190,13 +286,38 @@ class GameServerCls
   end
 
 
+
+  def _savePreconditions(gameName)
+    begin
+      assert(@gameSessions.has_key? gameName, 'game not in session')
+    rescue
+    end
+  end
+
+  def _savePostconditions(gameName)
+    begin
+      assert_not_equal(@databaseProxy.loadGame(gameName), nil, 'game not saved in database')
+    rescue
+    end
+  end
+
   # save the game for later
   def save(gameName)
+
+    # preconditions and invariants
+    _invariants
+    _savePreconditions(gameName)
+
     @log.debug('saving game "' + gameName + '"')
     begin
       game = Marshal.dump(@gameSessions[gameName])
       @databaseProxy.saveGame(gameName,game)
       @log.debug('game "' + gameName + '" was saved')
+
+      #post conditions and invariants
+      _savePostconditions(gameName)
+      _invariants
+
       return true
     rescue Mysql::Error => e
       @log.debug('game "' + gameName + '" could not be saved: ' + e.to_s)
@@ -205,11 +326,33 @@ class GameServerCls
   end
 
 
+
+  def _loadGamePreconditions
+    begin
+      assert_not_equal(@databaseProxy.loadGame(gameName), nil, 'game not saved in database')
+      assert_false(@gameSessions.has_key? gameName, 'game already in session')
+      assert(@gameSessions[gameName].players.has_key? userName, 'given user not in session')
+    rescue
+    end
+  end
+
+  def _loadGamePostconditions
+    begin
+      assert(@gameSessions.has_key? gameName, 'game not in session')
+    rescue
+    end
+  end
+
   # load a saved game
   def loadGame(gameName, username)
+
+    #preconditions and invariants
+    _loadGamePreconditions
+    _invariants
+
     @log.debug('trying to load game "' + gameName + '", with user "' + username + '" hosting')
     begin
-      if @gameCount >= @maxGames
+      if gameCount >= @maxGames
         message = 'too many games already in session to load game "' + gameName + '"'
         @log.debug(message)
         return [false,message]
@@ -228,6 +371,11 @@ class GameServerCls
       return [false,message]
     end
     @log.debug('game "' + gameName + '" has been loaded with user "' + username + '" hosting')
+
+    #postconditions and invariants
+    _loadGamePostconditions
+    _invariants
+
     return [@gameSessions[gameName].gameType,@gameSessions[gameName].hostUser]
   end
 
@@ -241,9 +389,15 @@ class GameServerCls
   def sendShutdownNotification
   end
 
+  def gameCount
+    @gameSessions.length
+  end
+
 
   def _invariants
-    
+    assert(gameCount <= 5, 'too many games')
+    assert(@gameSessions.length <= 5, 'too many games')
+    @gameSessions.each {|s| assert(s.players.length <= 2, 'too many players') }
   end
 
 

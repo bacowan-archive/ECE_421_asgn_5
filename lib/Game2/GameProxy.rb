@@ -34,6 +34,10 @@ class GameProxy
     @game.winCondition.getName
   end
 
+  def gameColumns
+    @game.board.getWidth
+  end
+
   def hostUser
     @hostUser
   end
