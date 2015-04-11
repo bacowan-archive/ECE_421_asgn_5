@@ -121,10 +121,10 @@ def notify(args)
 		# Declare the Winner in the Info box up top
 		board = args[1]
 		@player = args[2]
-		if @player == 1
-			message = "Host"
+		if @player == @host
+			message = @userName
 		else
-			message = "Guest"
+			message = "Other"
 		end
 
 		update(board)

@@ -39,6 +39,7 @@ Gtk.main_quit }
     start_button.signal_connect("clicked"){
 		
 	start_game
+	reset()
 	
 		
     }
@@ -48,7 +49,7 @@ Gtk.main_quit }
 	host_button.signal_connect("clicked"){
 
 		host_game
-			
+		reset()	
 	}
 
 # Step 5: get the Join Game Button
@@ -56,14 +57,14 @@ Gtk.main_quit }
 	join_button.signal_connect("clicked"){
 
 		join_game
-		
+		reset()
 	}
 
 # Step 5: load Game Button
 	load_button = @builder.get_object("button5")
 	load_button.signal_connect("clicked"){
 		load_game
-		
+		reset()
 		
 	}
 
@@ -71,7 +72,7 @@ Gtk.main_quit }
 	stat_button = @builder.get_object("button6")
 	stat_button.signal_connect("clicked"){
 		stats
-		
+		reset()
 		
 	}
 
@@ -163,6 +164,16 @@ Gtk.main_quit }
 
 	def getChoices()
 		@choices = (1..5).collect{|i| @builder.get_object("combobox" + i.to_s).active_text}
+	end
+
+	def reset()
+		@gameName = nil
+		@userName = nil
+		@host = ENV['HOSTNAME']  
+		@path = '/RPC2'
+		@port = GameServer.DEFAULT_PORT
+		@client = GameClientObjController.new(@host,@path,@port)
+		@choices = nil
 	end
 
 end
