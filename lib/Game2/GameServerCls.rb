@@ -4,11 +4,15 @@ require 'thread'
 require_relative '../src/model/Game'
 require_relative 'DatabaseProxy'
 require_relative 'GameProxy'
+require_relative 'Contracts'
 
 DEFAULT_MAX_GAMES = 5
 OTHER_PLAYER_LEFT_TOKEN = 'OTHER_PLAYER_LEFT_TOKEN'
 
 class GameServerCls
+
+  include Contracts
+
   INTERFACE = XMLRPC::interface('game') {
     meth 'Array getNotification(String, int)', 'get a notification from the server when the server has one', 'getNotification'
     meth 'array put(String, int)', 'put a piece (of the client) in the given column', 'put'
@@ -19,6 +23,7 @@ class GameServerCls
     meth 'String hostGame(String, String, String, Array)', 'host a game as a user of the given string, and the game type of the third string'
     meth 'Array loadGame(String, String)', 'load the game of the first string as the user of the second string. Return the game type, and the username of the host user.', 'loadGame'
   }
+
 
   # first param: max games that can take place at once
   def initialize(*args)
@@ -37,6 +42,10 @@ class GameServerCls
     @databaseProxy = DatabaseProxy.new
     @log.debug('server started')
   end
+
+  #def _getNotificationPreconditions(gameName,notificationNum)
+  #  @
+  #end
 
   # asynchronously get a notification. Note that this function must be called asynchronously from the client
   def getNotification(gameName, notificationNum)
@@ -69,6 +78,8 @@ class GameServerCls
     return notification
   end
 
+
+  # start a new game
   def hostGame(gameName,userName,gameType,dimensions)
     @log.debug('hosting game ' + gameName + '. Host user: ' + userName + '. Game Type: ' + gameType + '. Dimensions: ' + dimensions.to_s)
     if @gameCount < @maxGames # start a new game
@@ -87,13 +98,15 @@ class GameServerCls
     return message
   end
 
+
+  # connect to a game that has already been loaded onto the server
   # gameName: the name of the game to join
   # userName: the name of the user joining
   def connectToGame(gameName,userName)
     @log.debug('connecting to game: ' + gameName + ' as user: ' + userName)
     if @gameSessions.has_key?(gameName) # join the existing game
       if not @gameSessions[gameName].addPlayer(userName)
-        message = 'game "' + gameName + '" is full, and user "' + userName + '" is not a part of the game'
+        message = 'game "' + gameName + '" is full, and user "' + userName + '" is not a part of the game. Or user "' + userName + '" is already in the game.'
         @log.debug(message)
         return message
       end
@@ -105,6 +118,8 @@ class GameServerCls
     return message
   end
 
+
+  # place a piece in the given column of the given game
   def put(gameName, column)
     @log.debug('placing piece in game "' + gameName + '" in column ' + column.to_s)
     begin
@@ -117,6 +132,8 @@ class GameServerCls
     return [Game.UNKNOWN_EXCEPTION]
   end
 
+
+  # quit the game
   def quit(gameName, username)
     @log.debug('player "' + username + '" is leaving game "' + gameName + '"')
     if @gameSessions[gameName].playerLeave(username)
@@ -128,6 +145,8 @@ class GameServerCls
     return false
   end
 
+
+  # save the game for later
   def save(gameName)
     @log.debug('saving game "' + gameName + '"')
     begin
@@ -141,6 +160,8 @@ class GameServerCls
     end
   end
 
+
+  # load a saved game
   def loadGame(gameName, username)
     @log.debug('trying to load game "' + gameName + '", with user "' + username + '" hosting')
     begin
@@ -166,6 +187,8 @@ class GameServerCls
     return [@gameSessions[gameName].gameType,@gameSessions[gameName].hostUser]
   end
 
+
+  # get a list of statistics for the overall "tournament"
   def getStats
     return @databaseProxy.getAllUserStats
   end
@@ -173,5 +196,11 @@ class GameServerCls
   # tell anyone listening that it's time to shut down the server
   def sendShutdownNotification
   end
+
+
+  def _invariants
+    
+  end
+
 
 end

@@ -47,7 +47,12 @@ class GameProxy
 
 
     if args[0] == Game.WIN_FLAG
-      _winGame(args[2])
+      if args[2] == 1
+        winner = @hostUser
+      else
+        winner = players.keys.select {|user| user != @hostUser} [0]
+      end
+      _winGame(winner)
     elsif args[0] == Game.STALEMATE_FLAG
       _stalemate
     end
