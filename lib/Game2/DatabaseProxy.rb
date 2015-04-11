@@ -81,7 +81,7 @@ class DatabaseProxy
 
   def saveGame(gameName,game)
     @db.query('INSERT INTO ' + SAVED_GAMES_TABLE_NAME + " (" + GAME_NAME_COLUMN + ", " + GAME_COLUMN + ") VALUES ('" + gameName + "', '" + game + "') " +
-      "ON DUPLICATE KEY UPDATE " + GAME_COLUMN + "=" + game)
+      "ON DUPLICATE KEY UPDATE " + GAME_COLUMN + "='" + game + "'")
   end
 
   def loadGame(gameName)
