@@ -117,10 +117,11 @@ Gtk.main_quit }
 		screen = HostScreen.new(self)
 		if @gameName != nil and @userName != nil
 			ret = @client.connectToGame(@gameName,@userName)
-			if ret == ''
+			if ret[0] == ''
+				@choices[0] = ret[1]
 				new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName, 2)
 			else
-				popup = Gtk::MessageDialog.new(nil,:modal,:error,:close,"Error: " + ret)
+				popup = Gtk::MessageDialog.new(nil,:modal,:error,:close,"Error: " + ret[0])
 				popup.run
 				popup.destroy
 			end
