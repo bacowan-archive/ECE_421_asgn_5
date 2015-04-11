@@ -44,7 +44,9 @@ class GameServerCls
   end
 
   def _getNotificationPreconditions(gameName,notificationNum)
-    @gameSessions.has_key? 
+    #begin
+    #  assert(@gameSessions.has_key? gameName, 'game is not in the set of games')
+    #  assert(@gameSessions[gameName].
   end
 
   # asynchronously get a notification. Note that this function must be called asynchronously from the client
@@ -111,7 +113,7 @@ class GameServerCls
         return [message]
       end
       @log.debug('user "' + userName + '" has connected to game "' + gameName + '"')
-      return [@gameSessions[gameName].gameType]
+      return ['', @gameSessions[gameName].gameType]
     end # no such game
     message = 'game "' + gameName + '" does not exist'
     @log.debug(message)
