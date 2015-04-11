@@ -31,7 +31,7 @@ class GameClientObjController
 	end
 
 	def quit(gameName, userName)
-		ret serverProxy.quit(gameName,userName)
+		serverProxy.quit(gameName,userName)
 		@done = true
 	end
 
