@@ -68,7 +68,7 @@ class MultiplayerGameBoard
 #
     window = @builder.get_object("window1")
     window.signal_connect( "destroy" ){ 
-	
+	@client.quit(@gameName, @userName)
 	Gtk.main_quit 
 }
 
@@ -107,15 +107,15 @@ def notify(args)
 	if(flags_map[args[0]] == 0)
 		board = args[1]
 		@player = args[2]
-		if @player == 1
-			message = "Host"
+		if @host == @player
+			message = @userName + " please take your turn!"
 		else
-			message = "Guest"
+			message = "It is the Other player's Turn!"
 		end
 		update(board)
 		
 		# Play Continues
-		@builder.get_object("label1").text = message + " take your turn." 
+		@builder.get_object("label1").text = message 
 	
 	elsif(flags_map[args[0]] == 1) 
 		# Declare the Winner in the Info box up top
