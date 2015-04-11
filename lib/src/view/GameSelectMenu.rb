@@ -27,7 +27,7 @@ class GameMenu
 # Step 1: get the window to terminate the program when it's destroyed
 #
     window = @builder.get_object("window1")
-    window.signal_connect( "destroy" ) { @client.quit(@gameName, @userName)
+    window.signal_connect( "destroy" ) { 
 Gtk.main_quit }
 
 # Step 2: get the exit button to terminate the program when it's activated
