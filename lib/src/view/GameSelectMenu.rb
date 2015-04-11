@@ -9,8 +9,8 @@ class GameMenu
 
   def initialize
 
-	@gameName = "myGame"
-	@userName = "Iplayer"
+	@gameName = nil
+	@userName = nil
 	@host = ENV['HOSTNAME']  
 	@path = '/RPC2'
 	@port = GameServer.DEFAULT_PORT
@@ -27,7 +27,8 @@ class GameMenu
 # Step 1: get the window to terminate the program when it's destroyed
 #
     window = @builder.get_object("window1")
-    window.signal_connect( "destroy" ) { Gtk.main_quit }
+    window.signal_connect( "destroy" ) { @client.quit(@gameName, @userName)
+Gtk.main_quit }
 
 # Step 2: get the exit button to terminate the program when it's activated
     exit_button = @builder.get_object("button2")
@@ -89,39 +90,65 @@ class GameMenu
 
 	def host_game
 		getChoices()
+		@gameName = nil
+		@userName = nil
 		screen = HostScreen.new(self)
 		if @choices[0] == "Connect4"
 			gameType = ConnectFourWinCondition.name
 		else
 			gameType = OttoTootWinCondition.name
 		end
-		ret = @client.hostGame(@gameName,@userName,gameType,[6,7])
-		if ret == true
-			new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName, 1)
-		else
-			puts "Failed to Connect\n"
+		if @gameName != nil and @userName != nil
+			ret = @client.hostGame(@gameName,@userName,gameType,[6,7])
+			if ret == ''
+				new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName, 1)
+			else
+				popup = Gtk::MessageDialog.new(nil,:modal,:error,:close,"Error: " + ret)
+				popup.run
+				popup.destroy
+			end
 		end
 	end
 
 	def join_game
 		getChoices()
+		@gameName = nil
+		@userName = nil
 		screen = HostScreen.new(self)
-		@client.connectToGame(@gameName,@userName)
-		new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName, 2)
+		if @gameName != nil and @userName != nil
+			ret = @client.connectToGame(@gameName,@userName)
+			if ret == ''
+				new_game = MultiplayerGameBoard.new(@client, @choices, @gameName, @userName, 2)
+			else
+				popup = Gtk::MessageDialog.new(nil,:modal,:error,:close,"Error: " + ret)
+				popup.run
+				popup.destroy
+			end
+		end
 	end
 
 	def load_game
 		getChoices()
+		@gameName = nil
+		@userName = nil
 		screen = HostScreen.new(self)
-		ret = @client.loadGame(@gameName, @userName)
-		@choices[0] = ret[0]
-		if ret[1] == @userName
-			host = 1
-		else
-			host = 2
-		end
-		puts 'gameName: ' + @gameName
-		new_game = MultiplayerGameBoard.new(@client,@choices,@gameName,@userName, host)
+		if @gameName != nil and @userName != nil		
+			ret = @client.loadGame(@gameName, @userName)
+			if ret[0] == false
+				popup = Gtk::MessageDialog.new(nil,:modal,:error,:close,"Error: " + ret[1])
+				popup.run
+				popup.destroy
+			else
+				@choices[0] = ret[0]
+				if ret[1] == @userName
+					host = 1
+				else
+					host = 2
+				end
+				puts 'gameName: ' + @gameName
+				new_game = MultiplayerGameBoard.new(@client,@choices,@gameName,@userName, host)
+			end
+		end	
 	end
 
 	def stats

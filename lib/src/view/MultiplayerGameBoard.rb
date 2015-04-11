@@ -68,7 +68,7 @@ class MultiplayerGameBoard
 #
     window = @builder.get_object("window1")
     window.signal_connect( "destroy" ){ 
-	@client.quit(@gameName, @userName)
+	
 	Gtk.main_quit 
 }
 

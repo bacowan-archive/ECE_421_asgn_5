@@ -3,6 +3,8 @@
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
   <object class="GtkWindow" id="window1">
+    <property name="default_width">500</property>
+    <property name="default_height">300</property>
     <child>
       <object class="GtkScrolledWindow" id="scrolledwindow1">
         <property name="visible">True</property>
@@ -36,7 +38,7 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="button1">
-                    <property name="label" translatable="yes">Host</property>
+                    <property name="label" translatable="yes">Play</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
