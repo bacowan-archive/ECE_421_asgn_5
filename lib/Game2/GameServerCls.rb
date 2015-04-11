@@ -19,7 +19,7 @@ class GameServerCls
     meth 'boolean quit(String, String)', 'quit the game and disconnect from the server', 'quit'
     meth 'boolean save()', 'save the current game state', 'save'
     meth 'Hash getStats()', 'get the stats of the "tournament"', 'getStats'
-    meth 'String connectToGame(String, String)', 'connect to the game of the first string, as the user of the second string', 'connectToGame'
+    meth 'Array connectToGame(String, String)', 'connect to the game of the first string, as the user of the second string. Return the game type, and the username of the host user.', 'connectToGame'
     meth 'String hostGame(String, String, String, Array)', 'host a game as a user of the given string, and the game type of the third string'
     meth 'Array loadGame(String, String)', 'load the game of the first string as the user of the second string. Return the game type, and the username of the host user.', 'loadGame'
   }
@@ -43,9 +43,9 @@ class GameServerCls
     @log.debug('server started')
   end
 
-  #def _getNotificationPreconditions(gameName,notificationNum)
-  #  @
-  #end
+  def _getNotificationPreconditions(gameName,notificationNum)
+    @gameSessions.has_key? 
+  end
 
   # asynchronously get a notification. Note that this function must be called asynchronously from the client
   def getNotification(gameName, notificationNum)
@@ -108,14 +108,14 @@ class GameServerCls
       if not @gameSessions[gameName].addPlayer(userName)
         message = 'game "' + gameName + '" is full, and user "' + userName + '" is not a part of the game. Or user "' + userName + '" is already in the game.'
         @log.debug(message)
-        return message
+        return [message]
       end
       @log.debug('user "' + userName + '" has connected to game "' + gameName + '"')
-      return ''
+      return [@gameSessions[gameName].gameType]
     end # no such game
     message = 'game "' + gameName + '" does not exist'
     @log.debug(message)
-    return message
+    return [message]
   end
 
 
