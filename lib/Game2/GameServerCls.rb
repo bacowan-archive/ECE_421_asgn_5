@@ -111,12 +111,12 @@ class GameServerCls
 
 
   def _hostGamePreconditions(gameName,gameType)
-    begin
-      @_hostGamePreconditions_gameCount = @gameCount
-      assert_false(@gameSessions.has_key? gameName, 'game already in session')
-      assert_true(gameType == 'CONNECT_FOUR' or gameType == 'OTTO_TOOT')
-    rescue
-    end
+    #begin
+    #  @_hostGamePreconditions_gameCount = @gameCount
+    #  assert_false(@gameSessions.has_key? gameName, 'game already in session')
+    #  assert_true(gameType == 'CONNECT_FOUR' or gameType == 'OTTO_TOOT')
+    #rescue
+    #end
   end
 
   #def _hostGamePostconditions
