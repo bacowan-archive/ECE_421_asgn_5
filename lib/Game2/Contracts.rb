@@ -1,8 +1,14 @@
 module Contracts
 
-	def assert_true(expected,message)
+	def assert(expected,message)
 		if !expected
 			puts 'contract failed. Expected value to be false. Instead it was: ' + expected.to_s + "\n" + message
+		end
+	end
+
+	def assert_false(expected,message)
+		if expected
+			puts 'contract failed. Expected value to be true. Instead it was: ' + expected.to_s + "\n" + message
 		end
 	end
 

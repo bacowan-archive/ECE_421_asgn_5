@@ -75,14 +75,21 @@ class DatabaseProxy
     _initializeDatabase
   end
 
+  def deleteGame(gameName)
+    @db.query("DELETE FROM " + SAVED_GAMES_TABLE_NAME + " WHERE " + GAME_NAME_COLUMN + "='" + gameName + "'")
+  end
+
   def saveGame(gameName,game)
-    @db.query('INSERT INTO ' + SAVED_GAMES_TABLE_NAME + " (" + GAME_NAME_COLUMN + ", " + GAME_COLUMN + ") VALUES ('" + gameName + "', '" + game + "')")
+    @db.query('INSERT INTO ' + SAVED_GAMES_TABLE_NAME + " (" + GAME_NAME_COLUMN + ", " + GAME_COLUMN + ") VALUES ('" + gameName + "', '" + game + "') " +
+      "ON DUPLICATE KEY UPDATE " + GAME_COLUMN + "=" + game)
   end
 
   def loadGame(gameName)
     ret = @db.query('SELECT ' + GAME_COLUMN + " FROM " + SAVED_GAMES_TABLE_NAME + " WHERE " +
       GAME_NAME_COLUMN + " = '" + gameName + "'").fetch_row
-    @db.query("DELETE FROM " + SAVED_GAMES_TABLE_NAME + " WHERE " + GAME_NAME_COLUMN + "='" + gameName + "'")
+    if ret == nil
+      return nil
+    end
     return ret[0]
   end
 

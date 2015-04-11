@@ -53,8 +53,10 @@ class GameProxy
         winner = players.keys.select {|user| user != @hostUser} [0]
       end
       _winGame(winner)
+      @databaseProxy.deleteGame(@name)
     elsif args[0] == Game.STALEMATE_FLAG
       _stalemate
+      @databaseProxy.deleteGame(@name)
     end
 
   end
